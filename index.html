@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Gemini Voice & Text Transcribe Pro</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -25,9 +25,9 @@
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
         
-        .tab-active { border-bottom: 2px solid #0d9488; color: #0d9488; font-weight: 600; }
+        .tab-active { border-bottom: 2px solid #0d9488; color: #0d9488; font-weight: 600; background-color: white; }
         .tab-inactive { color: #64748b; border-bottom: 2px solid transparent; }
-        .tab-inactive:hover { color: #334155; border-bottom: 2px solid #cbd5e1; }
+        .tab-inactive:hover { color: #334155; border-bottom: 2px solid #cbd5e1; background-color: #f1f5f9; }
         
         .wave-container { display: flex; align-items: center; justify-content: center; gap: 4px; height: 30px; }
         .wave-bar { width: 4px; height: 10px; background-color: #ef4444; border-radius: 99px; animation: wave 1s ease-in-out infinite; }
@@ -37,23 +37,29 @@
         .wave-bar:nth-child(5) { animation-delay: 0.4s; }
         @keyframes wave { 0%, 100% { height: 10px; } 50% { height: 24px; } }
 
-        #toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 99999; display: flex; flex-direction: column; gap: 10px; }
-        .toast { min-width: 250px; padding: 12px 20px; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); color: white; font-weight: 500; transform: translateX(120%); transition: transform 0.3s ease-out; }
+        #toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 999999; display: flex; flex-direction: column; gap: 10px; }
+        .toast { min-width: 250px; padding: 12px 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); color: white; font-weight: 500; transform: translateX(120%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; items-center; gap: 10px; }
         .toast.show { transform: translateX(0); }
         .toast.success { background-color: #10b981; }
         .toast.error { background-color: #ef4444; }
         .toast.warning { background-color: #f59e0b; }
         .toast.info { background-color: #3b82f6; }
         
-        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        /* Tooltip style */
+        [data-tooltip]:hover::after {
+            content: attr(data-tooltip); position: absolute; bottom: -30px; left: 50%; transform: translateX(-50%);
+            background: rgba(0,0,0,0.8); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;
+            white-space: nowrap; z-index: 10; pointer-events: none;
+        }
     </style>
 </head>
 <body class="h-screen flex flex-col overflow-hidden text-gray-800 bg-gray-50">
 
-    <!-- 會員登入/註冊閘門 -->
     <div id="auth-gate" class="fixed inset-0 z-[100] flex items-center justify-center bg-cover bg-center bg-gray-900 transition-opacity duration-500" style="background-image: linear-gradient(rgba(17, 24, 39, 0.8), rgba(17, 24, 39, 0.9)), url('https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=2000&auto=format&fit=crop');">
         <div class="bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl w-full max-w-md p-8 transform transition-all duration-300 relative mx-4">
             <div class="text-center mb-8">
@@ -163,11 +169,11 @@
                     <img src="https://i.postimg.cc/fT2sQW09/1.png" alt="TONY Studio Logo" class="h-8 flex-shrink-0 hidden sm:block">
                     <div>
                         <h1 class="text-lg sm:text-xl font-bold text-gray-900 tracking-tight">Gemini Transcribe Pro</h1>
-                        <p class="text-[10px] text-gray-500 hidden sm:block">Powered by Gemini 3.5 & 3.7</p>
+                        <p class="text-[10px] text-gray-500 hidden sm:block">Powered by Gemini 3.5 & 3.7 Flash</p>
                     </div>
                 </div>
                 
-                <div class="flex items-center gap-3">
+                <div class="flex items-center gap-2 sm:gap-3">
                     <div class="hidden md:flex flex-col items-end mr-2">
                         <span id="header-user-name" class="text-sm font-bold text-gray-800">User</span>
                         <span id="header-user-role" class="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-600 font-medium">一般會員</span>
@@ -178,20 +184,20 @@
                         <span class="hidden sm:inline">管理後台</span>
                     </button>
 
-                    <button onclick="toggleHistorySidebar()" class="md:hidden w-9 h-9 flex items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors" title="開啟雲端歷史">
+                    <button onclick="toggleHistorySidebar()" class="md:hidden w-9 h-9 flex items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors relative" data-tooltip="雲端歷史紀錄">
                         <i class="fas fa-history text-sm"></i>
                     </button>
 
-                    <button onclick="toggleApiKeyModal()" class="flex items-center gap-2 px-3 py-1.5 rounded-md border border-gray-200 hover:bg-gray-50 transition-colors text-sm bg-white">
-                        <div id="api-status-indicator" class="w-2.5 h-2.5 rounded-full bg-red-500"></div>
+                    <button onclick="toggleApiKeyModal()" class="flex items-center justify-center w-9 h-9 sm:w-auto sm:px-3 sm:py-1.5 rounded-md border border-gray-200 hover:bg-gray-50 transition-colors text-sm bg-white relative" data-tooltip="API 金鑰設定">
+                        <div id="api-status-indicator" class="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-red-500 absolute top-1.5 right-1.5 sm:relative sm:top-0 sm:right-0 sm:mr-2"></div>
                         <i class="fas fa-key text-gray-500"></i>
                     </button>
                     
-                    <button onclick="handleLogout()" class="w-9 h-9 flex items-center justify-center rounded-full text-gray-500 hover:text-red-600 hover:bg-red-50 transition-colors bg-white border border-gray-200" title="登出系統">
+                    <button onclick="handleLogout()" class="w-9 h-9 flex items-center justify-center rounded-full text-gray-500 hover:text-red-600 hover:bg-red-50 transition-colors bg-white border border-gray-200 relative" data-tooltip="安全登出">
                         <i class="fas fa-sign-out-alt"></i>
                     </button>
 
-                    <button onclick="toggleCreatorProfile()" class="w-9 h-9 rounded-full overflow-hidden border-2 border-brand-500 hover:opacity-80 transition-opacity ml-1 shadow-sm" title="關於 TONY 顧問">
+                    <button onclick="toggleCreatorProfile()" class="w-9 h-9 rounded-full overflow-hidden border-2 border-brand-500 hover:opacity-80 transition-opacity ml-1 shadow-sm relative" data-tooltip="關於創作者">
                         <img src="https://i.postimg.cc/Gh8Zt7SX/S_56844323.jpg" alt="TONY 顧問" class="w-full h-full object-cover">
                     </button>
                 </div>
@@ -205,16 +211,16 @@
                 
                 <!-- 標籤列 -->
                 <div class="bg-gray-50 border-b border-gray-200 px-2 sm:px-6 flex gap-1 sm:gap-4 pt-3 flex-shrink-0 overflow-x-auto rounded-tl-lg">
-                    <button onclick="switchTab('stt')" id="tab-btn-stt" class="px-4 py-2.5 tab-active text-sm font-medium whitespace-nowrap transition-colors flex items-center rounded-t-lg bg-white border-t border-l border-r border-gray-200">
+                    <button onclick="switchTab('stt')" id="tab-btn-stt" class="px-4 py-2.5 tab-active text-sm font-medium whitespace-nowrap transition-colors flex items-center rounded-t-lg border-t border-l border-r border-gray-200">
                         <i class="fas fa-microphone-alt mr-2 text-brand-600"></i>語音轉錄
                     </button>
-                    <button onclick="switchTab('translate')" id="tab-btn-translate" class="px-4 py-2.5 tab-inactive text-sm font-medium whitespace-nowrap transition-colors flex items-center rounded-t-lg hover:bg-gray-100">
+                    <button onclick="switchTab('translate')" id="tab-btn-translate" class="px-4 py-2.5 tab-inactive text-sm font-medium whitespace-nowrap transition-colors flex items-center rounded-t-lg border border-transparent">
                         <i class="fas fa-language mr-2"></i>文字翻譯
                     </button>
                 </div>
                 
                 <!-- 工作區內容 -->
-                <div class="flex-1 overflow-y-auto p-4 sm:p-6 w-full">
+                <div class="flex-1 overflow-y-auto p-4 sm:p-6 w-full scroll-smooth" id="main-scroll-area">
                     
                     <!-- 語音轉錄區塊 (STT) -->
                     <div id="tab-stt" class="max-w-6xl mx-auto space-y-6 block">
@@ -222,7 +228,7 @@
                         <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                             <div class="bg-gray-50 px-6 py-4 border-b border-gray-200 flex justify-between items-center">
                                 <h2 class="text-base font-bold text-gray-800"><i class="fas fa-headphones mr-2 text-brand-600"></i>音訊輸入</h2>
-                                <span class="text-xs bg-brand-100 text-brand-800 px-2 py-1 rounded font-medium">Gemini 3.5 Transcribe</span>
+                                <span class="text-[10px] sm:text-xs bg-brand-100 text-brand-800 px-2 py-1 rounded font-medium shadow-sm">Gemini 3.5 Transcribe</span>
                             </div>
                             
                             <div class="p-6">
@@ -248,12 +254,12 @@
                                     </div>
 
                                     <!-- 檔案上傳拖曳區 -->
-                                    <div id="upload-zone" class="border-2 border-dashed border-gray-300 rounded-xl p-8 flex flex-col items-center justify-center text-center hover:bg-gray-50 hover:border-brand-300 transition-all relative min-h-[220px] bg-white group">
+                                    <div id="upload-zone" class="border-2 border-dashed border-gray-300 rounded-xl p-8 flex flex-col items-center justify-center text-center hover:bg-gray-50 hover:border-brand-300 transition-all relative min-h-[220px] bg-white group cursor-pointer">
                                         <input type="file" id="file-upload" accept="audio/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20">
                                         <div id="upload-icon-container" class="w-16 h-16 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center text-2xl mb-4 group-hover:bg-brand-100 group-hover:text-brand-600 transition-colors shadow-sm">
                                             <i class="fas fa-cloud-upload-alt"></i>
                                         </div>
-                                        <h3 class="font-bold text-gray-800 group-hover:text-brand-700 transition-colors">上傳音檔</h3>
+                                        <h3 class="font-bold text-gray-800 group-hover:text-brand-700 transition-colors">拖曳或點擊上傳音檔</h3>
                                         <p class="text-xs text-gray-500 mt-2">支援 MP3, WAV, M4A, WEBM</p>
                                         <p class="text-xs text-gray-400 mt-1">最大檔案限制: 20MB</p>
                                         
@@ -262,9 +268,9 @@
                                 </div>
 
                                 <!-- 音檔確認播放器 -->
-                                <div id="audio-playback-container" class="mt-6 hidden bg-gray-50 rounded-lg border border-gray-200 p-4">
+                                <div id="audio-playback-container" class="mt-6 hidden bg-gray-50 rounded-lg border border-gray-200 p-4 transition-all">
                                     <div class="flex items-center text-sm font-semibold text-gray-700 mb-2">
-                                        <i class="fas fa-play-circle text-brand-500 mr-2"></i>音檔預覽
+                                        <i class="fas fa-play-circle text-brand-500 mr-2"></i>音檔試聽確認
                                     </div>
                                     <audio id="audio-playback" controls class="w-full h-10"></audio>
                                 </div>
@@ -290,12 +296,12 @@
                                             </div>
                                         </div>
                                         
-                                        <div class="space-y-4 bg-purple-50 p-4 rounded-lg border border-purple-100">
-                                            <div class="flex items-center gap-2 mb-2">
+                                        <div class="space-y-4 bg-purple-50 p-4 rounded-lg border border-purple-100 relative overflow-hidden">
+                                            <div class="flex items-center gap-2 mb-2 relative z-10">
                                                 <i class="fas fa-bolt text-purple-600"></i>
                                                 <span class="text-xs font-bold text-purple-800 uppercase tracking-wide">3.5 專業功能</span>
                                             </div>
-                                            <label class="flex items-start gap-3 cursor-pointer group">
+                                            <label class="flex items-start gap-3 cursor-pointer group relative z-10">
                                                 <div class="mt-0.5">
                                                     <input type="checkbox" id="chk-srt" class="w-4 h-4 text-purple-600 rounded border-purple-300 focus:ring-purple-500">
                                                 </div>
@@ -304,7 +310,7 @@
                                                     <span class="text-xs text-purple-600/70 mt-1 block">包含毫秒級精準時間標記</span>
                                                 </div>
                                             </label>
-                                            <label class="flex items-start gap-3 cursor-pointer group">
+                                            <label class="flex items-start gap-3 cursor-pointer group relative z-10">
                                                 <div class="mt-0.5">
                                                     <input type="checkbox" id="chk-diarization" class="w-4 h-4 text-purple-600 rounded border-purple-300 focus:ring-purple-500">
                                                 </div>
@@ -313,6 +319,7 @@
                                                     <span class="text-xs text-purple-600/70 mt-1 block">自動分辨並標記不同說話者 (Diarization)</span>
                                                 </div>
                                             </label>
+                                            <i class="fas fa-brain absolute -bottom-4 -right-4 text-6xl text-purple-200/50 z-0 transform -rotate-12"></i>
                                         </div>
                                     </div>
                                 </div>
@@ -326,29 +333,29 @@
                         </div>
 
                         <!-- 語音輸出結果區 -->
-                        <div id="stt-output-section" class="bg-white rounded-xl shadow-sm border border-brand-200 overflow-hidden hidden scroll-mt-6">
-                            <div class="bg-brand-50 px-6 py-4 border-b border-brand-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                        <div id="stt-output-section" class="bg-white rounded-xl shadow-sm border border-brand-200 overflow-hidden hidden scroll-mt-6 transition-all duration-500">
+                            <div class="bg-brand-50 px-4 sm:px-6 py-4 border-b border-brand-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                                 <div class="flex items-center gap-3">
                                     <h2 class="text-lg font-bold text-brand-900"><i class="fas fa-file-alt mr-2"></i>處理結果</h2>
                                     <span id="detected-lang-badge" class="px-2.5 py-1 bg-white text-brand-700 text-xs rounded border border-brand-200 font-bold shadow-sm">完成</span>
                                 </div>
                                 <div class="flex flex-wrap gap-2 w-full md:w-auto">
-                                    <button onclick="downloadCurrentAudio()" class="px-3 py-1.5 bg-white text-gray-700 hover:bg-gray-50 rounded-md text-sm font-medium transition-colors border border-gray-300 shadow-sm flex items-center">
-                                        <i class="fas fa-music mr-1.5 text-gray-500"></i>音軌
+                                    <button onclick="downloadCurrentAudio()" class="px-3 py-1.5 bg-white text-gray-700 hover:bg-gray-50 rounded-md text-sm font-medium transition-colors border border-gray-300 shadow-sm flex items-center" data-tooltip="下載原始音檔">
+                                        <i class="fas fa-music sm:mr-1.5 text-gray-500"></i><span class="hidden sm:inline">音軌</span>
                                     </button>
-                                    <button id="btn-export-srt" onclick="exportToSRT()" class="hidden px-3 py-1.5 bg-white text-purple-700 hover:bg-purple-50 rounded-md text-sm font-medium transition-colors border border-purple-200 shadow-sm flex items-center">
-                                        <i class="fas fa-closed-captioning mr-1.5"></i>匯出 SRT
+                                    <button id="btn-export-srt" onclick="exportToSRT()" class="hidden px-3 py-1.5 bg-white text-purple-700 hover:bg-purple-50 rounded-md text-sm font-medium transition-colors border border-purple-200 shadow-sm flex items-center" data-tooltip="下載字幕檔">
+                                        <i class="fas fa-closed-captioning sm:mr-1.5"></i><span class="hidden sm:inline">匯出 SRT</span>
                                     </button>
-                                    <button onclick="exportToWord('stt')" class="px-3 py-1.5 bg-white text-blue-700 hover:bg-blue-50 rounded-md text-sm font-medium transition-colors border border-blue-200 shadow-sm flex items-center">
-                                        <i class="fas fa-file-word mr-1.5"></i>Word
+                                    <button onclick="exportToWord('stt')" class="px-3 py-1.5 bg-white text-blue-700 hover:bg-blue-50 rounded-md text-sm font-medium transition-colors border border-blue-200 shadow-sm flex items-center" data-tooltip="匯出為 Word 文件">
+                                        <i class="fas fa-file-word sm:mr-1.5"></i><span class="hidden sm:inline">Word</span>
                                     </button>
-                                    <button onclick="saveCurrentRecord('stt')" class="px-4 py-1.5 bg-brand-600 text-white hover:bg-brand-700 rounded-md text-sm font-bold transition-colors shadow-sm flex items-center">
-                                        <i class="fas fa-cloud-upload-alt mr-1.5"></i>儲存紀錄
+                                    <button onclick="saveCurrentRecord('stt')" class="px-4 py-1.5 bg-brand-600 text-white hover:bg-brand-700 rounded-md text-sm font-bold transition-colors shadow-sm flex items-center" data-tooltip="備份至雲端資料庫">
+                                        <i class="fas fa-cloud-upload-alt sm:mr-1.5"></i><span class="hidden sm:inline">儲存紀錄</span>
                                     </button>
                                 </div>
                             </div>
 
-                            <div class="p-6">
+                            <div class="p-4 sm:p-6">
                                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                                     <!-- 原文 -->
                                     <div class="flex flex-col h-full border border-gray-200 rounded-lg overflow-hidden">
@@ -356,7 +363,7 @@
                                             <h3 class="text-sm font-bold text-gray-700">原始轉錄內容 <span id="label-srt-active" class="hidden text-[10px] text-purple-700 bg-purple-100 px-1.5 py-0.5 rounded ml-2 font-semibold">SRT 模式</span></h3>
                                             <button onclick="copyToClipboard('stt-source-text')" class="text-gray-500 hover:text-gray-800 text-xs flex items-center px-2 py-1 bg-white rounded border border-gray-300 shadow-sm"><i class="far fa-copy mr-1"></i>複製</button>
                                         </div>
-                                        <textarea id="stt-source-text" readonly class="flex-1 w-full p-5 bg-white resize-y min-h-[300px] text-sm focus:outline-none focus:ring-2 focus:ring-inset focus:ring-gray-300 leading-relaxed font-mono whitespace-pre-wrap text-gray-800"></textarea>
+                                        <textarea id="stt-source-text" readonly class="flex-1 w-full p-4 sm:p-5 bg-white resize-y min-h-[250px] sm:min-h-[300px] text-sm focus:outline-none focus:ring-2 focus:ring-inset focus:ring-gray-300 leading-relaxed font-mono whitespace-pre-wrap text-gray-800"></textarea>
                                     </div>
 
                                     <!-- 翻譯 -->
@@ -365,21 +372,21 @@
                                             <h3 class="text-sm font-bold text-brand-800">繁體中文翻譯</h3>
                                             <button onclick="copyToClipboard('stt-translated-text')" class="text-brand-600 hover:text-brand-900 text-xs flex items-center px-2 py-1 bg-white rounded border border-brand-300 shadow-sm"><i class="far fa-copy mr-1"></i>複製</button>
                                         </div>
-                                        <textarea id="stt-translated-text" readonly class="flex-1 w-full p-5 bg-transparent resize-y min-h-[300px] text-sm focus:outline-none focus:ring-2 focus:ring-inset focus:ring-brand-300 leading-relaxed text-gray-900 font-serif whitespace-pre-wrap"></textarea>
+                                        <textarea id="stt-translated-text" readonly class="flex-1 w-full p-4 sm:p-5 bg-transparent resize-y min-h-[250px] sm:min-h-[300px] text-sm focus:outline-none focus:ring-2 focus:ring-inset focus:ring-brand-300 leading-relaxed text-gray-900 font-serif whitespace-pre-wrap"></textarea>
                                     </div>
                                 </div>
 
                                 <!-- AI 智慧助手面板 -->
-                                <div class="mt-8 bg-gray-50 rounded-xl border border-gray-200 p-5">
-                                    <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-5 gap-3">
+                                <div class="mt-8 bg-gray-50 rounded-xl border border-gray-200 p-4 sm:p-5 shadow-sm">
+                                    <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-5 gap-3">
                                         <div class="flex items-center gap-2">
-                                            <h3 class="text-base font-bold text-gray-900"><i class="fas fa-robot text-brand-600 mr-2 text-xl"></i>AI 深度分析</h3>
-                                            <span class="text-[10px] bg-gray-200 text-gray-700 px-2 py-1 rounded font-bold">Gemini 3.7 Flash</span>
+                                            <h3 class="text-base font-bold text-gray-900"><i class="fas fa-robot text-brand-600 mr-2 text-xl"></i>AI 智慧助手</h3>
+                                            <span class="text-[10px] bg-gray-200 text-gray-700 px-2 py-1 rounded font-bold shadow-sm border border-gray-300">Gemini 3.7 Flash</span>
                                         </div>
                                         <div class="flex flex-wrap gap-2">
-                                            <button onclick="runAIAssistant('summary')" class="px-4 py-2 bg-gray-800 text-white rounded shadow-sm text-xs font-bold hover:bg-gray-900 transition-colors flex items-center"><i class="fas fa-list-ul mr-1.5"></i>重點摘要</button>
-                                            <button onclick="runAIAssistant('action')" class="px-4 py-2 bg-brand-600 text-white rounded shadow-sm text-xs font-bold hover:bg-brand-700 transition-colors flex items-center"><i class="fas fa-check-square mr-1.5"></i>待辦事項</button>
-                                            <button onclick="runAIAssistant('polish')" class="px-4 py-2 bg-blue-600 text-white rounded shadow-sm text-xs font-bold hover:bg-blue-700 transition-colors flex items-center"><i class="fas fa-pen-nib mr-1.5"></i>文法潤飾</button>
+                                            <button onclick="runAIAssistant('summary')" class="px-3 sm:px-4 py-2 bg-gray-800 text-white rounded shadow-sm text-xs font-bold hover:bg-gray-900 transition-colors flex items-center"><i class="fas fa-list-ul mr-1.5"></i>重點摘要</button>
+                                            <button onclick="runAIAssistant('action')" class="px-3 sm:px-4 py-2 bg-brand-600 text-white rounded shadow-sm text-xs font-bold hover:bg-brand-700 transition-colors flex items-center"><i class="fas fa-check-square mr-1.5"></i>待辦事項</button>
+                                            <button onclick="runAIAssistant('polish')" class="px-3 sm:px-4 py-2 bg-blue-600 text-white rounded shadow-sm text-xs font-bold hover:bg-blue-700 transition-colors flex items-center"><i class="fas fa-pen-nib mr-1.5"></i>文法潤飾</button>
                                         </div>
                                     </div>
                                     
@@ -394,11 +401,11 @@
                                         <div class="flex justify-between items-center bg-gray-100 px-4 py-2 border-b border-gray-200">
                                             <span class="text-xs font-bold text-gray-600">分析結果</span>
                                             <div class="flex gap-2">
-                                                <button onclick="exportToWord('ai')" class="text-blue-600 hover:text-blue-800 text-xs flex items-center bg-white px-2 py-1 rounded border border-gray-300 shadow-sm"><i class="fas fa-file-word mr-1"></i>Word</button>
-                                                <button onclick="copyToClipboard('ai-assistant-output')" class="text-gray-600 hover:text-gray-900 text-xs flex items-center bg-white px-2 py-1 rounded border border-gray-300 shadow-sm"><i class="far fa-copy mr-1"></i>複製</button>
+                                                <button onclick="exportToWord('ai')" class="text-blue-600 hover:text-blue-800 text-xs flex items-center bg-white px-2 py-1 rounded border border-gray-300 shadow-sm transition-colors"><i class="fas fa-file-word mr-1"></i>匯出 Word</button>
+                                                <button onclick="copyToClipboard('ai-assistant-output')" class="text-gray-600 hover:text-gray-900 text-xs flex items-center bg-white px-2 py-1 rounded border border-gray-300 shadow-sm transition-colors"><i class="far fa-copy mr-1"></i>複製</button>
                                             </div>
                                         </div>
-                                        <textarea id="ai-assistant-output" readonly placeholder="點擊上方按鈕，讓 AI 為您整理逐字稿重點..." class="w-full p-5 min-h-[180px] text-sm focus:outline-none leading-relaxed text-gray-800 font-serif whitespace-pre-wrap resize-y"></textarea>
+                                        <textarea id="ai-assistant-output" readonly placeholder="點擊上方按鈕，讓 AI 3.7 Flash 為您整理逐字稿的商業重點..." class="w-full p-4 sm:p-5 min-h-[150px] sm:min-h-[180px] text-sm focus:outline-none leading-relaxed text-gray-800 font-serif whitespace-pre-wrap resize-y"></textarea>
                                     </div>
                                 </div>
                             </div>
@@ -406,15 +413,15 @@
                     </div>
 
                     <!-- 純文字翻譯區塊 -->
-                    <div id="tab-translate" class="max-w-6xl mx-auto hidden h-full flex-col">
-                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 flex-1 flex flex-col overflow-hidden">
-                            <div class="bg-gray-50 px-6 py-4 border-b border-gray-200 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
-                                <h2 class="text-base font-bold text-gray-800 flex items-center"><i class="fas fa-language text-brand-600 mr-2 text-xl"></i>純文字極速翻譯 <span class="ml-2 text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded font-medium">Gemini 3.7 Flash</span></h2>
+                    <div id="tab-translate" class="max-w-6xl mx-auto hidden flex-col pb-10">
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 flex flex-col overflow-hidden">
+                            <div class="bg-gray-50 px-4 sm:px-6 py-4 border-b border-gray-200 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+                                <h2 class="text-base font-bold text-gray-800 flex items-center"><i class="fas fa-language text-brand-600 mr-2 text-xl"></i>純文字極速翻譯 <span class="ml-2 text-[10px] bg-gray-200 text-gray-700 px-2 py-1 rounded font-bold border border-gray-300">Gemini 3.7 Flash</span></h2>
                                 
-                                <div class="flex flex-wrap items-center gap-3 w-full lg:w-auto">
-                                    <div class="flex items-center bg-white rounded border border-gray-300 overflow-hidden shadow-sm">
-                                        <span class="text-xs text-gray-600 font-bold px-3 py-1.5 bg-gray-100 border-r border-gray-300">目標語言</span>
-                                        <select id="translation-target-lang" class="text-sm border-none focus:ring-0 py-1.5 px-2 text-gray-800 font-medium cursor-pointer outline-none bg-transparent">
+                                <div class="flex flex-wrap items-center gap-2 sm:gap-3 w-full lg:w-auto">
+                                    <div class="flex items-center bg-white rounded border border-gray-300 overflow-hidden shadow-sm flex-1 lg:flex-none">
+                                        <span class="text-[10px] sm:text-xs text-gray-600 font-bold px-2 sm:px-3 py-1.5 bg-gray-100 border-r border-gray-300 whitespace-nowrap">目標</span>
+                                        <select id="translation-target-lang" class="text-xs sm:text-sm border-none focus:ring-0 py-1.5 px-1 sm:px-2 text-gray-800 font-medium cursor-pointer outline-none bg-transparent w-full">
                                             <option value="繁體中文" selected>繁體中文</option>
                                             <option value="簡體中文">簡體中文 (Simplified)</option>
                                             <option value="English">英文 (English)</option>
@@ -427,9 +434,9 @@
                                         </select>
                                     </div>
 
-                                    <div class="flex items-center bg-white rounded border border-gray-300 overflow-hidden shadow-sm">
-                                        <span class="text-xs text-gray-600 font-bold px-3 py-1.5 bg-gray-100 border-r border-gray-300">語氣</span>
-                                        <select id="translation-tone" class="text-sm border-none focus:ring-0 py-1.5 px-2 text-gray-800 cursor-pointer outline-none bg-transparent">
+                                    <div class="flex items-center bg-white rounded border border-gray-300 overflow-hidden shadow-sm flex-1 lg:flex-none">
+                                        <span class="text-[10px] sm:text-xs text-gray-600 font-bold px-2 sm:px-3 py-1.5 bg-gray-100 border-r border-gray-300 whitespace-nowrap">語氣</span>
+                                        <select id="translation-tone" class="text-xs sm:text-sm border-none focus:ring-0 py-1.5 px-1 sm:px-2 text-gray-800 cursor-pointer outline-none bg-transparent w-full">
                                             <option value="預設流暢">流暢自然</option>
                                             <option value="商務正式">商務正式</option>
                                             <option value="口語對話">生活口語</option>
@@ -437,32 +444,34 @@
                                         </select>
                                     </div>
                                     
-                                    <button id="btn-translate-text" class="px-5 py-2 bg-brand-600 text-white rounded hover:bg-brand-700 font-bold shadow-md transition-colors flex items-center">
+                                    <button id="btn-translate-text" class="w-full lg:w-auto px-5 py-2 bg-brand-600 text-white rounded hover:bg-brand-700 font-bold shadow-md transition-colors flex items-center justify-center">
                                         <i class="fas fa-magic mr-2"></i> 執行翻譯
                                     </button>
                                 </div>
                             </div>
 
-                            <div class="p-6 flex-1 flex flex-col">
-                                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 flex-1 h-full">
+                            <div class="p-4 sm:p-6 flex flex-col">
+                                <!-- 移除 h-full 限制，改用自然流動以修復手機版消失的問題 -->
+                                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                                     <!-- 輸入 -->
-                                    <div class="flex flex-col h-full min-h-[300px] border border-gray-300 rounded-lg overflow-hidden focus-within:border-brand-500 focus-within:ring-1 focus-within:ring-brand-500 transition-all shadow-inner">
+                                    <div class="flex flex-col min-h-[300px] border border-gray-300 rounded-lg overflow-hidden focus-within:border-brand-500 focus-within:ring-1 focus-within:ring-brand-500 transition-all shadow-inner">
                                         <div class="bg-gray-100 px-4 py-3 border-b border-gray-300 flex justify-between items-center">
                                             <span class="text-sm font-bold text-gray-700">原文</span>
                                             <button onclick="document.getElementById('text-input').value = ''" class="text-gray-500 hover:text-red-600 text-xs flex items-center px-2 py-1 bg-white rounded border border-gray-300 shadow-sm"><i class="fas fa-trash-alt mr-1"></i>清除</button>
                                         </div>
-                                        <textarea id="text-input" placeholder="請貼上或輸入需要翻譯的文字 (支援多國語言自動偵測)..." class="flex-1 w-full p-5 resize-none text-base focus:outline-none bg-white font-mono leading-relaxed"></textarea>
+                                        <textarea id="text-input" placeholder="請貼上或輸入需要翻譯的文字 (支援多國語言自動偵測)..." class="flex-1 w-full p-4 sm:p-5 resize-y min-h-[250px] text-base focus:outline-none bg-white font-mono leading-relaxed text-gray-800"></textarea>
                                     </div>
 
                                     <!-- 輸出 -->
-                                    <div class="flex flex-col h-full min-h-[300px] relative border border-brand-300 rounded-lg overflow-hidden bg-brand-50/20 shadow-inner">
+                                    <div class="flex flex-col min-h-[300px] relative border border-brand-300 rounded-lg overflow-hidden bg-brand-50/20 shadow-inner">
                                         <div class="bg-brand-100 px-4 py-3 border-b border-brand-300 flex justify-between items-center">
                                             <span class="text-sm font-bold text-brand-800">翻譯結果</span>
                                             <div class="flex items-center gap-2">
-                                                <button id="btn-play-audio" onclick="playTranslatedAudio()" class="text-brand-700 hover:text-brand-900 text-xs flex items-center bg-white px-2 py-1 rounded border border-brand-300 shadow-sm">
+                                                <!-- TTS 語音朗讀按鈕 -->
+                                                <button id="btn-play-audio" onclick="playTranslatedAudio()" class="text-brand-700 hover:text-brand-900 text-xs flex items-center bg-white px-2 py-1 rounded border border-brand-300 shadow-sm transition-colors" data-tooltip="使用 Web Speech API 朗讀">
                                                     <i class="fas fa-volume-up mr-1.5"></i>朗讀
                                                 </button>
-                                                <button onclick="copyToClipboard('text-output')" class="text-brand-700 hover:text-brand-900 text-xs flex items-center bg-white px-2 py-1 rounded border border-brand-300 shadow-sm">
+                                                <button onclick="copyToClipboard('text-output')" class="text-brand-700 hover:text-brand-900 text-xs flex items-center bg-white px-2 py-1 rounded border border-brand-300 shadow-sm transition-colors">
                                                     <i class="far fa-copy mr-1"></i>複製
                                                 </button>
                                             </div>
@@ -475,11 +484,11 @@
                                             </div>
                                         </div>
                                         
-                                        <textarea id="text-output" readonly placeholder="翻譯結果將顯示於此..." class="flex-1 w-full p-5 bg-transparent resize-none text-base focus:outline-none text-gray-900 leading-relaxed font-serif whitespace-pre-wrap"></textarea>
+                                        <textarea id="text-output" readonly placeholder="翻譯結果將顯示於此..." class="flex-1 w-full p-4 sm:p-5 bg-transparent resize-y min-h-[250px] text-base focus:outline-none text-gray-900 leading-relaxed font-serif whitespace-pre-wrap"></textarea>
                                     </div>
                                 </div>
                                 
-                                <div class="mt-6 flex justify-end gap-3 pt-4 border-t border-gray-100">
+                                <div class="mt-6 flex flex-wrap justify-end gap-3 pt-4 border-t border-gray-100">
                                     <button onclick="exportToWord('translate')" class="px-4 py-2 bg-white text-blue-700 hover:bg-blue-50 border border-blue-300 rounded shadow-sm text-sm font-bold transition-colors flex items-center">
                                         <i class="fas fa-file-word mr-2"></i>匯出 Word
                                     </button>
@@ -534,7 +543,7 @@
     </div>
 
     <!-- API Key 設定彈窗 -->
-    <div id="modal-apikey" class="fixed inset-0 bg-black/60 z-[60] flex items-center justify-center hidden opacity-0 transition-opacity backdrop-blur-sm p-4">
+    <div id="modal-apikey" class="fixed inset-0 bg-black/60 z-[110] flex items-center justify-center hidden opacity-0 transition-opacity backdrop-blur-sm p-4">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 sm:p-8 transform scale-95 transition-transform" id="modal-apikey-content">
             <h3 class="text-xl font-bold mb-2 text-gray-900 flex items-center"><i class="fas fa-key text-brand-600 mr-2"></i>設定 Gemini API Key</h3>
             <p class="text-sm text-gray-600 mb-4 leading-relaxed">請輸入您的 Google Gemini API 金鑰。金鑰將安全地儲存於您的瀏覽器中。</p>
@@ -561,7 +570,7 @@
         </div>
     </div>
 
-    <!-- TONY 老師介紹彈窗 -->
+    <!-- TONY 老師介紹彈窗 (調整層級確保在最上層) -->
     <div id="modal-creator" class="fixed inset-0 bg-black/80 z-[9999] flex items-center justify-center hidden opacity-0 transition-opacity p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-3xl overflow-hidden transform scale-95 transition-transform flex flex-col max-h-[95vh] relative" id="modal-creator-content">
             <button onclick="toggleCreatorProfile()" class="absolute top-4 right-4 z-50 text-white hover:text-gray-200 bg-black/40 hover:bg-black/60 rounded-full w-8 h-8 flex items-center justify-center transition-all shadow-md">
@@ -641,13 +650,13 @@
             </div>
             
             <div class="flex border-b border-gray-200 px-6 bg-gray-100">
-                <button onclick="switchAdminTab('users')" id="admin-tab-users" class="px-5 py-3.5 text-sm font-bold border-b-2 border-brand-600 text-brand-600">會員管理</button>
+                <button onclick="switchAdminTab('users')" id="admin-tab-users" class="px-5 py-3.5 text-sm font-bold border-b-2 border-brand-600 text-brand-600 bg-white">會員管理</button>
                 <button onclick="switchAdminTab('report')" id="admin-tab-report" class="px-5 py-3.5 text-sm font-bold border-b-2 border-transparent text-gray-500 hover:text-gray-800 transition-colors">AI 營運報告</button>
             </div>
 
-            <div id="admin-view-users" class="flex-1 overflow-auto p-6 block bg-gray-50">
-                <div class="overflow-hidden border border-gray-200 rounded-xl shadow-sm bg-white">
-                    <table class="w-full text-sm text-left text-gray-600">
+            <div id="admin-view-users" class="flex-1 overflow-auto p-4 sm:p-6 block bg-gray-50">
+                <div class="overflow-x-auto border border-gray-200 rounded-xl shadow-sm bg-white">
+                    <table class="w-full text-sm text-left text-gray-600 min-w-[800px]">
                         <thead class="text-xs text-gray-700 uppercase bg-gray-100 border-b border-gray-200 font-bold">
                             <tr>
                                 <th class="px-5 py-4">真實姓名</th>
@@ -688,7 +697,7 @@
 
                     <div id="report-loading" class="hidden flex-col items-center justify-center py-12">
                         <i class="fas fa-circle-notch fa-spin text-5xl text-brand-500 mb-4"></i>
-                        <span class="text-base text-gray-700 font-bold">Gemini 3.7 Flash 正在閱讀海量數據...</span>
+                        <span class="text-base text-gray-700 font-bold mt-2">Gemini 3.7 Flash 正在閱讀海量數據...</span>
                     </div>
 
                     <div id="report-result-container" class="hidden mt-10 border-t border-gray-200 pt-8">
@@ -722,6 +731,7 @@
         </div>
     </div>
 
+    <!-- Toast Notification Container -->
     <div id="toast-container"></div>
 
     <!-- Firebase 核心邏輯 -->
@@ -731,6 +741,7 @@
         import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, setDoc, getDoc, updateDoc, serverTimestamp, query, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
 
+        // TONY 老師的 Firebase 設定
         const firebaseConfig = {
             apiKey: "AIzaSyB7KwhWyC3Gt8LeOLBgaxcrmYwr8BAHwmg",
             authDomain: "k18-tony-firebase.firebaseapp.com",
@@ -742,7 +753,7 @@
 
         let app, db, auth, storage;
         window.currentUserData = null; 
-        window.isRegistering = false; 
+        window.isRegistering = false; // 註冊防護鎖，防止競態條件
 
         try {
             app = initializeApp(firebaseConfig);
@@ -750,6 +761,7 @@
             auth = getAuth(app);
             storage = getStorage(app);
             
+            // 將 Firebase 方法掛載到全域，供一般腳本呼叫
             window.fbDb = db; window.fbStorage = storage; window.fbAuth = auth;
             window.fbCollection = collection; window.fbAddDoc = addDoc; window.fbGetDocs = getDocs; 
             window.fbDeleteDoc = deleteDoc; window.fbDoc = doc; window.fbServerTimestamp = serverTimestamp;
@@ -757,8 +769,9 @@
             window.fbDeleteObject = deleteObject; window.fbSetDoc = setDoc; window.fbGetDoc = getDoc;
             window.fbUpdateDoc = updateDoc; window.fbQuery = query; window.fbWhere = where;
 
+            // 身分狀態監聽器
             onAuthStateChanged(auth, async (user) => {
-                if (window.isRegistering) return;
+                if (window.isRegistering) return; // 如果正在註冊流程中，攔截監聽器，避免干擾資料寫入
 
                 const gate = document.getElementById('auth-gate');
                 const core = document.getElementById('app-core');
@@ -769,6 +782,7 @@
                 };
                 
                 if (user) {
+                    // Double Opt-in：強制驗證信箱
                     if (!user.emailVerified) {
                         showToast('您的信箱尚未驗證！請至信箱點擊驗證連結後再次登入。', 'error');
                         await signOut(auth); resetLoginBtn();
@@ -778,14 +792,19 @@
                     }
 
                     try {
+                        // 讀取使用者資料，加上 8 秒超時保護
                         const getProfile = getDoc(doc(db, 'users', user.uid));
-                        const userDoc = await Promise.race([ getProfile, new Promise((_, reject) => setTimeout(() => reject(new Error('FIRESTORE_TIMEOUT')), 8000)) ]);
+                        const userDoc = await Promise.race([ 
+                            getProfile, 
+                            new Promise((_, reject) => setTimeout(() => reject(new Error('FIRESTORE_TIMEOUT')), 8000)) 
+                        ]);
 
                         if (userDoc.exists()) {
                             window.currentUserData = userDoc.data();
                             document.getElementById('header-user-name').textContent = window.currentUserData.realName || 'User';
                             document.getElementById('header-user-role').textContent = window.currentUserData.role === 'admin' ? '系統管理員' : window.currentUserData.identity;
                             
+                            // Admin 權限分流
                             if (window.currentUserData.role === 'admin') {
                                 document.getElementById('header-user-role').classList.replace('bg-gray-100', 'bg-yellow-100');
                                 document.getElementById('header-user-role').classList.replace('text-gray-600', 'text-yellow-800');
@@ -794,6 +813,7 @@
                                 document.getElementById('btn-admin-panel').classList.add('hidden'); document.getElementById('btn-admin-panel').classList.remove('flex');
                             }
 
+                            // 更新登入次數
                             updateDoc(doc(db, 'users', user.uid), { loginCount: (window.currentUserData.loginCount || 0) + 1, lastLoginAt: serverTimestamp() }).catch(e => console.log(e));
 
                             gate.classList.add('opacity-0'); setTimeout(() => gate.classList.add('pointer-events-none'), 500);
@@ -804,7 +824,11 @@
                             await signOut(auth); showToast('找不到會員資料，請重新註冊', 'error'); resetLoginBtn();
                         }
                     } catch (err) {
-                        showToast(err.message === 'FIRESTORE_TIMEOUT' ? '登入超時！' : '讀取資料失敗', 'error');
+                        if(err.message === 'FIRESTORE_TIMEOUT') {
+                            showToast('登入超時！請檢查 Firebase Firestore 資料庫是否已建立且規則放行。', 'error');
+                        } else {
+                            showToast('讀取資料失敗，請確認 Firebase 設定。', 'error');
+                        }
                         await signOut(auth); resetLoginBtn();
                     }
                 } else {
@@ -826,27 +850,43 @@
             if(password.length < 6) return showToast('密碼至少 6 碼', 'warning');
 
             const originalHtml = btn.innerHTML; btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>處理中...'; btn.disabled = true;
-            window.isRegistering = true; 
+            window.isRegistering = true; // 上鎖，防止監聽器踢人
 
             try {
+                // 1. 建立帳號
                 const userCred = await createUserWithEmailAndPassword(window.fbAuth, email, password);
+                
+                // 2. 判斷是否為 TONY 老師的超級管理員帳號
                 let role = (email.toLowerCase() === 'mindnodeai@gmail.com') ? 'admin' : 'user';
 
+                // 3. 寫入資料庫 (加入 8 秒超時保護)
                 const saveProfilePromise = window.fbSetDoc(window.fbDoc(window.fbDb, 'users', userCred.user.uid), {
                     email: email, realName: name, identity: identity, role: role, createdAt: window.fbServerTimestamp(), loginCount: 0
                 });
+                await Promise.race([ 
+                    saveProfilePromise, 
+                    new Promise((_, reject) => setTimeout(() => reject(new Error('FIRESTORE_TIMEOUT')), 8000)) 
+                ]);
                 
-                await Promise.race([ saveProfilePromise, new Promise((_, reject) => setTimeout(() => reject(new Error('FIRESTORE_TIMEOUT')), 8000)) ]);
+                // 4. 發送驗證信 & 強制登出
                 await sendEmailVerification(userCred.user);
                 await signOut(window.fbAuth); 
                 
-                showToast('註冊成功！請至信箱點擊驗證連結', 'success');
+                showToast('註冊成功！請至信箱點擊驗證連結。', 'success');
                 setTimeout(() => switchAuthTab('login'), 1000);
                 ['reg-name', 'reg-email', 'reg-password'].forEach(id => document.getElementById(id).value = '');
             } catch (error) {
-                showToast(error.code === 'auth/email-already-in-use' ? '此信箱已被註冊' : '註冊失敗', 'error');
+                if(error.message === 'FIRESTORE_TIMEOUT') {
+                    showToast('資料庫連線逾時！請檢查 Firebase Firestore 是否已正確建置並設定 Rules。', 'error');
+                } else if(error.code === 'auth/email-already-in-use') {
+                    showToast('此信箱已被註冊', 'error');
+                } else {
+                    showToast('註冊失敗，請稍後再試', 'error');
+                }
                 if(window.fbAuth.currentUser) await signOut(window.fbAuth);
-            } finally { btn.innerHTML = originalHtml; btn.disabled = false; window.isRegistering = false; }
+            } finally { 
+                btn.innerHTML = originalHtml; btn.disabled = false; window.isRegistering = false; // 解鎖 
+            }
         };
 
         window.handleLogin = async function() {
@@ -857,8 +897,14 @@
             if(!email || !password) return showToast('請填寫信箱與密碼', 'warning');
             const originalHtml = btn.innerHTML; btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>登入中...'; btn.disabled = true;
 
-            try { await signInWithEmailAndPassword(window.fbAuth, email, password); } 
-            catch (error) { showToast('帳號或密碼錯誤', 'error'); btn.innerHTML = originalHtml; btn.disabled = false; }
+            try { 
+                await signInWithEmailAndPassword(window.fbAuth, email, password); 
+                // 登入成功後，onAuthStateChanged 會接手後續動作
+            } 
+            catch (error) { 
+                showToast('帳號或密碼錯誤', 'error'); 
+                btn.innerHTML = originalHtml; btn.disabled = false; 
+            }
         };
 
         window.handleLogout = async function() {
@@ -871,7 +917,7 @@
             const originalHtml = btn.innerHTML; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; btn.disabled = true;
             try {
                 await sendPasswordResetEmail(window.fbAuth, email);
-                showToast('重設連結已發送！', 'success'); hideForgotPassword();
+                showToast('重設連結已發送！請檢查信箱與垃圾郵件。', 'success'); hideForgotPassword();
             } catch (error) { showToast('發送失敗', 'error'); } finally { btn.innerHTML = originalHtml; btn.disabled = false; }
         };
 
@@ -905,7 +951,7 @@
                         <p class="text-sm font-bold text-gray-800 line-clamp-2 pr-8 leading-snug">${record.title || '無標題'}</p>
                         ${record.audio_url ? `<div class="mt-3" onclick="event.stopPropagation()"><audio controls src="${record.audio_url}" class="w-full h-8" preload="none"></audio></div>` : ''}
                         <div class="absolute right-2 top-8 flex flex-col gap-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
-                            <button onclick="deleteRecord('${record.id}', '${record.audio_url || ''}', event)" class="w-7 h-7 flex items-center justify-center text-gray-400 hover:text-red-600 bg-gray-50 hover:bg-red-50 rounded shadow-sm border border-gray-200"><i class="fas fa-trash-alt text-xs"></i></button>
+                            <button onclick="deleteRecord('${record.id}', '${record.audio_url || ''}', event)" class="w-7 h-7 flex items-center justify-center text-gray-400 hover:text-red-600 bg-gray-50 hover:bg-red-50 rounded shadow-sm border border-gray-200" title="刪除紀錄"><i class="fas fa-trash-alt text-xs"></i></button>
                         </div>
                     `;
                     
@@ -931,6 +977,7 @@
             } catch (error) { listContainer.innerHTML = '<div class="text-center text-red-500 mt-10">讀取失敗</div>'; }
         };
 
+        // Admin Dashboard Logic
         window.loadAllUsersAdmin = async function() {
             if (!window.fbDb || window.currentUserData?.role !== 'admin') return;
             const tbody = document.getElementById('admin-users-tbody');
@@ -959,10 +1006,10 @@
                         <td class="px-5 py-3.5 text-gray-700 text-center font-bold">${u.loginCount || 0}</td>
                         <td class="px-5 py-3.5 text-right">
                             <div class="flex items-center justify-end gap-2">
-                                <button onclick="adminViewUserRecords('${u.id}', '${u.realName || u.email}')" class="px-3 py-1.5 rounded bg-blue-50 text-blue-700 hover:bg-blue-100 font-bold text-xs shadow-sm transition-colors"><i class="fas fa-file-alt mr-1"></i>紀錄</button>
+                                <button onclick="adminViewUserRecords('${u.id}', '${u.realName || u.email}')" class="px-3 py-1.5 rounded bg-blue-50 text-blue-700 hover:bg-blue-100 font-bold text-xs shadow-sm transition-colors" title="查看紀錄"><i class="fas fa-file-alt mr-1"></i>紀錄</button>
                                 ${isSuperAdmin ? `<span class="text-xs text-gray-400 italic">創作者</span>` : `
                                     <button onclick="adminToggleRole('${u.id}', '${u.role}')" class="w-8 h-8 rounded bg-yellow-50 text-yellow-700 hover:bg-yellow-100 flex items-center justify-center shadow-sm transition-colors" title="切換權限"><i class="fas fa-exchange-alt"></i></button>
-                                    <button onclick="adminDeleteUser('${u.id}', '${u.email}')" class="w-8 h-8 rounded bg-red-50 text-red-600 hover:bg-red-100 flex items-center justify-center shadow-sm transition-colors" title="刪除"><i class="fas fa-trash-alt"></i></button>
+                                    <button onclick="adminDeleteUser('${u.id}', '${u.email}')" class="w-8 h-8 rounded bg-red-50 text-red-600 hover:bg-red-100 flex items-center justify-center shadow-sm transition-colors" title="刪除會員"><i class="fas fa-trash-alt"></i></button>
                                 `}
                             </div>
                         </td>
@@ -973,14 +1020,22 @@
 
         window.adminToggleRole = async function(uid, currentRole) {
             if(!confirm(`確定變更為 ${currentRole === 'admin' ? 'User' : 'Admin'} 嗎？`)) return;
-            try { await window.fbUpdateDoc(window.fbDoc(window.fbDb, 'users', uid), { role: currentRole === 'admin' ? 'user' : 'admin' }); showToast('已更新', 'success'); window.loadAllUsersAdmin(); } 
-            catch (err) { showToast('失敗', 'error'); }
+            try { 
+                await window.fbUpdateDoc(window.fbDoc(window.fbDb, 'users', uid), { role: currentRole === 'admin' ? 'user' : 'admin' }); 
+                showToast('已更新', 'success'); window.loadAllUsersAdmin(); 
+            } catch (err) { 
+                showToast(`更新失敗：${err.message}`, 'error'); 
+            }
         };
 
         window.adminDeleteUser = async function(uid, email) {
             if(!confirm(`確定刪除 ${email} 嗎？無法復原！`)) return;
-            try { await window.fbDeleteDoc(window.fbDoc(window.fbDb, 'users', uid)); showToast('已刪除', 'success'); window.loadAllUsersAdmin(); } 
-            catch (err) { showToast('失敗', 'error'); }
+            try { 
+                await window.fbDeleteDoc(window.fbDoc(window.fbDb, 'users', uid)); 
+                showToast('已刪除', 'success'); window.loadAllUsersAdmin(); 
+            } catch (err) { 
+                showToast(`刪除失敗：${err.message}`, 'error'); 
+            }
         };
 
         window.adminViewUserRecords = async function(uid, name) {
@@ -1014,7 +1069,7 @@
                         ${r.audio_url ? `<div class="mt-3 pt-3 border-t border-gray-100"><a href="${r.audio_url}" target="_blank" class="text-sm text-blue-600 hover:text-blue-800 font-bold"><i class="fas fa-play-circle mr-1"></i>聽取音檔</a></div>` : ''}
                     `; list.appendChild(div);
                 });
-            } catch (err) { list.innerHTML = `<div class="text-center text-red-500 py-10">失敗</div>`; }
+            } catch (err) { list.innerHTML = `<div class="text-center text-red-500 py-10">失敗: ${err.message}</div>`; }
         };
 
         window.exportToCSV = function() {
@@ -1024,6 +1079,7 @@
                 const d = u.createdAt ? new Date(u.createdAt.seconds * 1000).toLocaleString('zh-TW') : '';
                 csvContent += `"${(u.realName||'').replace(/"/g,'""')}","${(u.email||'').replace(/"/g,'""')}","${(u.identity||'').replace(/"/g,'""')}","${u.role}","${d}",${u.loginCount||0}\n`;
             });
+            // 加入 BOM 標記 (\ufeff) 避免 Excel 中文亂碼
             const blob = new Blob(['\ufeff', csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = `Users_${Date.now()}.csv`;
             document.body.appendChild(link); link.click(); document.body.removeChild(link);
@@ -1037,15 +1093,20 @@
         let isRecording = false; let recordTimerInterval; let recordSeconds = 0;
         window.currentTranscriptionData = null; window.currentTranslationData = null;   
 
-        document.addEventListener('DOMContentLoaded', () => { updateApiKeyUI(); setupAudioInputListeners(); switchTab('stt'); });
+        document.addEventListener('DOMContentLoaded', () => { 
+            updateApiKeyUI(); 
+            setupAudioInputListeners(); 
+            switchTab('stt'); 
+        });
 
         function showToast(message, type = 'info') {
             const container = document.getElementById('toast-container'); const toast = document.createElement('div');
-            toast.className = `toast ${type}`; toast.innerHTML = `<div class="flex items-center gap-2"><i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i><span class="text-sm">${message}</span></div>`;
+            toast.className = `toast ${type}`; toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'} text-lg"></i><span class="text-sm leading-snug">${message}</span>`;
             container.appendChild(toast); setTimeout(() => toast.classList.add('show'), 10);
-            setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 3000);
+            setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 3500);
         }
 
+        // Tab Switching Logic
         function switchAuthTab(tab) {
             const tabs = { login: ['auth-tab-login', 'auth-tab-register', 'form-login', 'form-register'], register: ['auth-tab-register', 'auth-tab-login', 'form-register', 'form-login'] };
             document.getElementById('form-forgot').classList.add('hidden');
@@ -1073,6 +1134,7 @@
             }
         }
 
+        // Modal Toggles
         function toggleHistorySidebar() {
             const s = document.getElementById('history-sidebar'); const b = document.getElementById('history-backdrop');
             if (s.classList.contains('translate-x-full')) { s.classList.remove('translate-x-full'); b.classList.remove('hidden'); } 
@@ -1121,18 +1183,18 @@
         }
 
         async function saveApiKey() {
-            const key = document.getElementById('input-api-key').value.trim(); if (!key) return showToast('請輸入', 'error');
+            const key = document.getElementById('input-api-key').value.trim(); if (!key) return showToast('請輸入金鑰', 'error');
             const btn = document.querySelector('#modal-apikey-content button.bg-brand-600'); const orig = btn.innerHTML; btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1.5"></i>驗證中...'; btn.disabled = true;
             try {
                 const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.7-flash:generateContent?key=${key}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [{ parts: [{ text: "Hi" }] }] }) });
-                if (res.ok) { currentApiKey = key; localStorage.setItem('gemini_api_key', key); updateApiKeyUI(); showToast('成功', 'success'); toggleApiKeyModal(); } 
-                else { showToast('無效金鑰', 'error'); }
+                if (res.ok) { currentApiKey = key; localStorage.setItem('gemini_api_key', key); updateApiKeyUI(); showToast('金鑰驗證成功並已儲存', 'success'); toggleApiKeyModal(); } 
+                else { showToast('無效的 API 金鑰', 'error'); }
             } catch (e) { showToast('網路錯誤', 'error'); } finally { btn.innerHTML = orig; btn.disabled = false; }
         }
 
         function updateApiKeyUI() {
             const ind = document.getElementById('api-status-indicator');
-            ind.className = currentApiKey ? "w-2.5 h-2.5 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.8)]" : "w-2.5 h-2.5 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)]";
+            ind.className = currentApiKey ? "w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-green-500 absolute top-1.5 right-1.5 sm:relative sm:top-0 sm:right-0 sm:mr-2 shadow-[0_0_8px_rgba(34,197,94,0.8)]" : "w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-red-500 absolute top-1.5 right-1.5 sm:relative sm:top-0 sm:right-0 sm:mr-2 shadow-[0_0_8px_rgba(239,68,68,0.8)]";
         }
 
         async function prepareAudioForGemini() { return new Promise((res) => { const r = new FileReader(); r.readAsDataURL(audioBlob); r.onloadend = () => { audioBase64 = r.result.split(',')[1]; res(); } }); }
@@ -1142,6 +1204,7 @@
             document.getElementById('btn-stop-record').addEventListener('click', stopRecording);
             document.getElementById('btn-process-audio').addEventListener('click', processAudioWithGemini);
 
+            // Drag and Drop UX Feedback
             const uZ = document.getElementById('upload-zone'); const uI = document.getElementById('upload-icon-container');
             if(uZ && uI) {
                 ['dragenter', 'dragover'].forEach(e => uZ.addEventListener(e, ev => { ev.preventDefault(); uZ.classList.add('border-brand-500', 'bg-brand-50'); uI.classList.add('bg-brand-100', 'text-brand-600'); }));
@@ -1155,7 +1218,7 @@
                         document.getElementById('audio-playback').src = URL.createObjectURL(audioBlob); document.getElementById('audio-playback-container').classList.remove('hidden');
                         const fi = document.getElementById('selected-file-info'); fi.textContent = `${audioBlob.name} (${(audioBlob.size/1024/1024).toFixed(2)} MB)`; fi.classList.remove('hidden');
                         const b = document.getElementById('btn-process-audio'); b.classList.remove('opacity-50', 'cursor-not-allowed'); b.disabled = false;
-                        showToast('已載入', 'success');
+                        showToast('音檔已載入就緒', 'success');
                     } catch (err) { showToast('讀取失敗', 'error'); }
                 }
             });
@@ -1189,7 +1252,7 @@
         }
 
         async function processAudioWithGemini() {
-            if (!currentApiKey) return showToast('請設定 API Key', 'error'); if (!audioBase64) return showToast('無音檔', 'warning');
+            if (!currentApiKey) return showToast('請先設定 Gemini API Key', 'error'); if (!audioBase64) return showToast('請先上傳或錄製音檔', 'warning');
 
             const btn = document.getElementById('btn-process-audio'); const origHtml = btn.innerHTML;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Gemini 處理中...'; btn.disabled = true;
@@ -1208,17 +1271,23 @@
                 else prompt += "【輸出】純文字逐字稿。\n";
                 if(vocab) prompt += `【優先詞庫】${vocab}\n`; prompt += "【嚴格】若無人聲強制輸出「未偵測到清晰語音」。";
 
+                // 強制 MIME Type 校正，防止伺服器端解碼失敗
                 let mt = "audio/mpeg"; if(audioBlob.type.includes('webm')) mt = "audio/webm"; else if(audioBlob.type.includes('wav')) mt = "audio/wav";
 
+                // 將音檔 InlineData 放置於 prompt 之前，防止 3.5 模型「看文忘音」
                 const payload = { contents: [{ role: "user", parts: [{ inlineData: { mimeType: mt, data: audioBase64 } }, { text: prompt }] }], generationConfig: { temperature: 0.2 } };
                 let srcTxt = "";
                 
                 try {
+                    // 第 1 階段：主引擎 gemini-3.5-transcribe 處理
                     const r35 = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-transcribe:generateContent?key=${currentApiKey}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
                     const res35 = await r35.json(); if (!r35.ok) throw new Error(); srcTxt = res35?.candidates?.[0]?.content?.parts?.[0]?.text;
+                    
+                    // 防堵吃字 Bug：若 3.5 吐出空值，手動拋出錯誤以觸發備援
                     if (!srcTxt || srcTxt.trim() === "" || srcTxt.trim() === "{}") throw new Error("3.5 失敗");
                 } catch (e) {
-                    showToast('3.5 異常，啟動 3.7 備援', 'warning'); btn.innerHTML = '<i class="fas fa-bolt mr-2"></i>3.7 Flash 備援中...';
+                    // 第 2 階段：備援引擎 gemini-3.7-flash 救援
+                    showToast('3.5 異常，啟動 3.7 Flash 備援', 'warning'); btn.innerHTML = '<i class="fas fa-bolt mr-2"></i>3.7 Flash 備援中...';
                     const r37 = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.7-flash:generateContent?key=${currentApiKey}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
                     const res37 = await r37.json(); if (!r37.ok) throw new Error('API 錯誤'); srcTxt = res37?.candidates?.[0]?.content?.parts?.[0]?.text;
                     if (!srcTxt || srcTxt.trim() === "") srcTxt = "【提示：未偵測到語音】"; else srcTxt = "【備援】\n" + srcTxt.trim();
@@ -1226,7 +1295,7 @@
 
                 let transTxt = "未啟用同步翻譯";
                 if (isAuto && !srcTxt.includes("【提示：")) {
-                    showToast('翻譯中...', 'info');
+                    showToast('同步翻譯中...', 'info');
                     const tRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.7-flash:generateContent?key=${currentApiKey}`, {
                         method: 'POST', headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ contents: [{ role: "user", parts: [{ text: `翻譯為繁中(保留SRT格式若有):\n\n${srcTxt}` }] }] })
@@ -1237,20 +1306,24 @@
                 document.getElementById('stt-output-section').classList.remove('hidden');
                 document.getElementById('stt-source-text').value = srcTxt.trim(); document.getElementById('stt-translated-text').value = transTxt.trim();
                 
-                if (isSrt && !srcTxt.includes("【提示：")) {
+                if (isSrt && !srcTxt.includes("【提示：") && !srcTxt.includes("【備援】")) {
                     document.getElementById('btn-export-srt').classList.remove('hidden'); document.getElementById('label-srt-active').classList.replace('hidden', 'inline-block');
                 }
                 
                 window.currentTranscriptionData = { type: 'stt', source_text: srcTxt, translated_text: transTxt, detected_language: "轉錄", audio_duration: recordSeconds||0, is_srt: isSrt };
-                showToast('處理完成', 'success'); setTimeout(() => document.getElementById('stt-output-section').scrollIntoView({ behavior: 'smooth' }), 200);
+                showToast('處理完成', 'success'); 
+                
+                // 平滑滾動到結果區 (UX Optimization)
+                setTimeout(() => { document.getElementById('main-scroll-area').scrollTo({ top: document.getElementById('stt-output-section').offsetTop - 20, behavior: 'smooth' }); }, 300);
             } catch (err) {
-                document.getElementById('stt-source-text').value = "【錯誤】\n" + err.message; document.getElementById('stt-output-section').classList.remove('hidden'); showToast('失敗', 'error');
+                document.getElementById('stt-source-text').value = "【錯誤】\n處理失敗，請檢查網路或金鑰狀態。"; document.getElementById('stt-output-section').classList.remove('hidden'); showToast('處理失敗', 'error');
             } finally { btn.innerHTML = origHtml; btn.disabled = false; }
         }
 
+        // Text Translation
         document.getElementById('btn-translate-text').addEventListener('click', async () => {
             if (!currentApiKey) return showToast('需設定 API Key', 'error');
-            const txt = document.getElementById('text-input').value.trim(); if (!txt) return showToast('請輸入', 'info');
+            const txt = document.getElementById('text-input').value.trim(); if (!txt) return showToast('請輸入文字', 'info');
             const tone = document.getElementById('translation-tone').value; const tLang = document.getElementById('translation-target-lang').value;
             
             document.getElementById('translation-loading').classList.replace('hidden', 'flex'); document.getElementById('text-output').value = "";
@@ -1263,21 +1336,40 @@
                 let out = data?.candidates?.[0]?.content?.parts?.[0]?.text || "錯誤";
                 document.getElementById('text-output').value = out.trim();
                 window.currentTranslationData = { type: 'translate', source_text: txt, translated_text: out, detected_language: tLang };
-                showToast('完成', 'success');
-            } catch (e) { showToast('失敗', 'error'); document.getElementById('text-output').value = "錯誤"; } 
+                showToast('翻譯完成', 'success');
+            } catch (e) { showToast('翻譯失敗', 'error'); document.getElementById('text-output').value = "錯誤"; } 
             finally { document.getElementById('translation-loading').classList.replace('flex', 'hidden'); }
         });
 
+        // TTS Audio Playback (Web Speech API)
         window.playTranslatedAudio = async function() {
-            const text = document.getElementById('text-output').value.trim(); if (!text) return;
-            const btn = document.getElementById('btn-play-audio'); const orig = btn.innerHTML; btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1.5"></i>'; btn.disabled = true;
+            const text = document.getElementById('text-output').value.trim(); if (!text) return showToast('沒有可以朗讀的文字', 'warning');
+            const btn = document.getElementById('btn-play-audio'); const orig = btn.innerHTML; 
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1.5"></i>'; btn.disabled = true;
             try {
                 if ('speechSynthesis' in window) {
-                    window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); const tl = document.getElementById('translation-target-lang').value;
-                    if(tl.includes('中')) u.lang = 'zh-TW'; else if(tl.includes('Eng')) u.lang = 'en-US'; else u.lang = 'zh-TW';
-                    u.onend = () => { btn.innerHTML = orig; btn.disabled = false; }; u.onerror = () => { btn.innerHTML = orig; btn.disabled = false; };
-                    window.speechSynthesis.speak(u); btn.innerHTML = '<i class="fas fa-volume-up text-brand-600 animate-pulse mr-1.5"></i>';
-                } else { showToast('不支援', 'error'); btn.innerHTML = orig; btn.disabled = false; }
+                    window.speechSynthesis.cancel(); 
+                    const u = new SpeechSynthesisUtterance(text); 
+                    const tl = document.getElementById('translation-target-lang').value;
+                    
+                    // 自動判斷語言語系 BCP-47 tag
+                    if(tl.includes('簡體')) u.lang = 'zh-CN'; 
+                    else if(tl.includes('中')) u.lang = 'zh-TW'; 
+                    else if(tl.includes('Eng')) u.lang = 'en-US'; 
+                    else if(tl.includes('日本')) u.lang = 'ja-JP';
+                    else if(tl.includes('韓')) u.lang = 'ko-KR';
+                    else if(tl.includes('西班')) u.lang = 'es-ES';
+                    else if(tl.includes('泰')) u.lang = 'th-TH';
+                    else if(tl.includes('印尼')) u.lang = 'id-ID';
+                    else if(tl.includes('越')) u.lang = 'vi-VN';
+                    else u.lang = 'zh-TW';
+
+                    u.onend = () => { btn.innerHTML = orig; btn.disabled = false; }; 
+                    u.onerror = () => { btn.innerHTML = orig; btn.disabled = false; showToast('語音引擎發生錯誤', 'error'); };
+                    
+                    window.speechSynthesis.speak(u); 
+                    btn.innerHTML = '<i class="fas fa-volume-up text-brand-600 animate-pulse mr-1.5"></i>朗讀中';
+                } else { showToast('您的瀏覽器不支援語音合成', 'error'); btn.innerHTML = orig; btn.disabled = false; }
             } catch (e) { btn.innerHTML = orig; btn.disabled = false; }
         };
 
@@ -1285,74 +1377,93 @@
             let html = ''; let fn = '';
             if (tab === 'ai') {
                 const out = document.getElementById('ai-assistant-output').value; if (!out) return;
-                html = `<html xmlns:w='urn:schemas-microsoft-com:office:word'><head><meta charset='utf-8'></head><body><h2>AI 分析</h2><pre>${out}</pre></body></html>`; fn = `AI_${Date.now()}.doc`;
+                html = `<html xmlns:w='urn:schemas-microsoft-com:office:word'><head><meta charset='utf-8'></head><body><h2>AI 商業分析</h2><pre>${out}</pre></body></html>`; fn = `AI_Analysis_${Date.now()}.doc`;
             } else {
                 const s = tab === 'stt' ? document.getElementById('stt-source-text').value : document.getElementById('text-input').value;
                 const t = tab === 'stt' ? document.getElementById('stt-translated-text').value : document.getElementById('text-output').value;
                 if(!s && !t) return;
-                html = `<html xmlns:w='urn:schemas-microsoft-com:office:word'><head><meta charset='utf-8'></head><body><h2>紀錄</h2><h3>原文</h3><pre>${s}</pre><h3>翻譯</h3><pre>${t}</pre></body></html>`; fn = `Doc_${Date.now()}.doc`;
+                html = `<html xmlns:w='urn:schemas-microsoft-com:office:word'><head><meta charset='utf-8'></head><body><h2>雲端紀錄</h2><h3>原文</h3><pre>${s}</pre><h3>翻譯結果</h3><pre>${t}</pre></body></html>`; fn = `Record_${Date.now()}.doc`;
             }
-            const b = new Blob(['\ufeff', html], { type: 'application/msword' }); const l = document.createElement('a'); l.href = URL.createObjectURL(b); l.download = fn; l.click(); showToast('下載中', 'success');
+            // 加上 \ufeff 防止中文亂碼
+            const b = new Blob(['\ufeff', html], { type: 'application/msword' }); const l = document.createElement('a'); l.href = URL.createObjectURL(b); l.download = fn; l.click(); showToast('Word 下載中', 'success');
         }
 
         function exportToSRT() {
-            const t = document.getElementById('stt-source-text').value; if (!t || t.includes('【')) return;
-            const b = new Blob([t], { type: 'text/plain' }); const l = document.createElement('a'); l.href = URL.createObjectURL(b); l.download = `SRT_${Date.now()}.srt`; l.click();
+            const t = document.getElementById('stt-source-text').value; if (!t || t.includes('【提示：')) return;
+            const b = new Blob([t], { type: 'text/plain' }); const l = document.createElement('a'); l.href = URL.createObjectURL(b); l.download = `Subtitle_${Date.now()}.srt`; l.click();
         }
 
         function downloadCurrentAudio() {
-            if (!audioBlob) return; const u = URL.createObjectURL(audioBlob); const l = document.createElement('a'); l.href = u; l.download = `Audio_${Date.now()}.mp3`; l.click();
+            if (!audioBlob) return showToast('沒有可用的音軌', 'warning'); 
+            const u = URL.createObjectURL(audioBlob); const l = document.createElement('a'); l.href = u; l.download = `Audio_${Date.now()}.mp3`; l.click();
         }
 
         async function saveCurrentRecord(tab) {
-            if (!window.fbDb || !window.fbAuth.currentUser) return showToast('需登入', 'error');
+            if (!window.fbDb || !window.fbAuth.currentUser) return showToast('需登入才能儲存', 'error');
             let data = tab === 'stt' ? window.currentTranscriptionData : window.currentTranslationData; if (!data) return;
             try {
-                let url = null; if (tab === 'stt' && audioBlob && window.fbStorage) { const r = window.fbRef(window.fbStorage, `audio/${Date.now()}.mp3`); const s = await window.fbUploadBytes(r, audioBlob); url = await window.fbGetDownloadURL(s.ref); }
+                let url = null; 
+                // 只上傳使用者的 STT 音檔，使用 uid 開頭命名符合安全規則
+                if (tab === 'stt' && audioBlob && window.fbStorage) { 
+                    const r = window.fbRef(window.fbStorage, `audio_records/${window.fbAuth.currentUser.uid}_${Date.now()}.mp3`); 
+                    const s = await window.fbUploadBytes(r, audioBlob); url = await window.fbGetDownloadURL(s.ref); 
+                }
                 await window.fbAddDoc(window.fbCollection(window.fbDb, "transcription_records"), { userId: window.fbAuth.currentUser.uid, title: (data.source_text||'').substring(0, 15)+'...', source_text: data.source_text, translated_text: data.translated_text, record_type: data.type, audio_url: url, created_at: window.fbServerTimestamp(), is_srt: data.is_srt||false });
-                showToast('已儲存', 'success'); if(window.loadHistoryFromFirebase) window.loadHistoryFromFirebase();
-            } catch (e) { showToast('失敗', 'error'); }
+                showToast('已安全儲存至雲端', 'success'); if(window.loadHistoryFromFirebase) window.loadHistoryFromFirebase();
+            } catch (e) { showToast('雲端儲存失敗', 'error'); }
         }
 
         async function deleteRecord(id, url, e) {
-            e.stopPropagation(); if (!confirm('確定刪除？')) return;
-            try { if (url) try { await window.fbDeleteObject(window.fbRef(window.fbStorage, url)); } catch(e){} await window.fbDeleteDoc(window.fbDoc(window.fbDb, "transcription_records", id)); if(window.loadHistoryFromFirebase) window.loadHistoryFromFirebase(); } catch(err){}
+            e.stopPropagation(); if (!confirm('確定刪除此紀錄？無法復原！')) return;
+            try { if (url) try { await window.fbDeleteObject(window.fbRef(window.fbStorage, url)); } catch(e){} await window.fbDeleteDoc(window.fbDoc(window.fbDb, "transcription_records", id)); showToast('已刪除', 'success'); if(window.loadHistoryFromFirebase) window.loadHistoryFromFirebase(); } catch(err){}
         }
 
         document.getElementById('search-history').addEventListener('input', (e) => {
             const t = e.target.value.toLowerCase(); document.querySelectorAll('#history-list > div').forEach(i => { if(!i.classList.contains('text-center')) i.style.display = i.innerText.toLowerCase().includes(t) ? 'flex' : 'none'; });
         });
 
+        // AI 營運數據報告
         async function generateAIReport() {
-            if(!currentApiKey) return showToast('設 API Key', 'error');
-            const sd = document.getElementById('report-start-date').value; const ed = document.getElementById('report-end-date').value; if(!sd || !ed) return;
+            if(!currentApiKey) return showToast('請設定 API Key', 'error');
+            const sd = document.getElementById('report-start-date').value; const ed = document.getElementById('report-end-date').value; if(!sd || !ed) return showToast('請選擇起訖日期', 'warning');
             const btn = document.getElementById('btn-generate-report'); const l = document.getElementById('report-loading'); const c = document.getElementById('report-result-container'); const out = document.getElementById('report-output');
             btn.disabled = true; l.classList.replace('hidden', 'flex'); c.classList.add('hidden'); out.value = '';
             try {
                 const q = await window.fbGetDocs(window.fbCollection(window.fbDb, "transcription_records")); let d = [];
                 const sts = new Date(sd).getTime(); const ets = new Date(ed).getTime()+86400000;
                 q.forEach(doc => { const data = doc.data(); if(data.created_at) { const ts = data.created_at.seconds*1000; if(ts>=sts && ts<=ets) d.push(`[${data.record_type}] ${(data.source_text||'').substring(0,100)}`); } });
-                if(d.length===0) { out.value='無資料'; return; }
-                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.7-flash:generateContent?key=${currentApiKey}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [{ role: "user", parts: [{ text: `分析報告:\n${d.join('\n').substring(0,5000)}` }] }] }) });
-                const json = await res.json(); out.value = json?.candidates?.[0]?.content?.parts?.[0]?.text || '失敗';
-            } catch(e) { out.value = '錯誤'; } finally { btn.disabled = false; l.classList.replace('flex', 'hidden'); c.classList.remove('hidden'); }
-        }
-        function exportReportToWord() {
-            const t = document.getElementById('report-output').value; if(!t) return;
-            const b = new Blob(['\ufeff', `<html xmlns:w='urn:schemas-microsoft-com:office:word'><head><meta charset='utf-8'></head><body><h2>報告</h2><pre>${t}</pre></body></html>`], { type: 'application/msword' });
-            const l = document.createElement('a'); l.href = URL.createObjectURL(b); l.download = `Report_${Date.now()}.doc`; l.click();
+                if(d.length===0) { out.value='選定期間內無任何營運資料。'; return; }
+                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.7-flash:generateContent?key=${currentApiKey}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [{ role: "user", parts: [{ text: `請根據以下系統歷史轉錄紀錄，分析這段期間使用者的熱門話題、使用趨勢與建議:\n${d.join('\n').substring(0,5000)}` }] }] }) });
+                const json = await res.json(); out.value = json?.candidates?.[0]?.content?.parts?.[0]?.text || '生成失敗';
+            } catch(e) { out.value = 'API 錯誤'; } finally { btn.disabled = false; l.classList.replace('flex', 'hidden'); c.classList.remove('hidden'); }
         }
 
+        function exportReportToWord() {
+            const t = document.getElementById('report-output').value; if(!t) return;
+            const b = new Blob(['\ufeff', `<html xmlns:w='urn:schemas-microsoft-com:office:word'><head><meta charset='utf-8'></head><body><h2>AI 營運數據分析報告</h2><pre>${t}</pre></body></html>`], { type: 'application/msword' });
+            const l = document.createElement('a'); l.href = URL.createObjectURL(b); l.download = `Admin_Report_${Date.now()}.doc`; l.click();
+        }
+
+        // AI 智慧助手 (重點摘要、待辦事項、文法潤飾)
         async function runAIAssistant(type) {
-            if(!currentApiKey) return showToast('設定金鑰', 'error');
-            const txt = document.getElementById('stt-source-text').value.trim(); if(!txt || txt.includes('【')) return showToast('無內容', 'warn');
+            if(!currentApiKey) return showToast('請先設定 API 金鑰', 'error');
+            const txt = document.getElementById('stt-source-text').value.trim(); 
+            // 若為空值或純粹的錯誤訊息，則不執行
+            if(!txt || txt.includes('【錯誤】') || txt.includes('【提示：未偵測到')) return showToast('無有效的逐字稿內容', 'warning');
+            
             const l = document.getElementById('ai-assistant-loading'); const o = document.getElementById('ai-assistant-output'); const lt = document.getElementById('ai-assistant-loading-text');
             l.classList.replace('hidden', 'flex'); o.value = '';
-            let p = ""; if(type==='summary') { lt.textContent='摘要中...'; p=`重點摘要:\n${txt}`; } else if(type==='action') { lt.textContent='待辦...'; p=`列出待辦事項:\n${txt}`; } else { lt.textContent='潤飾...'; p=`潤飾文法:\n${txt}`; }
+            
+            let p = ""; 
+            if(type === 'summary') { lt.textContent='AI 正在整理重點摘要...'; p=`請將以下文字整理成結構清晰的重點摘要 (Bullet points):\n\n${txt}`; } 
+            else if(type === 'action') { lt.textContent='AI 正在提取待辦事項...'; p=`請從以下文字中，找出所有的行動呼籲與待辦事項 (Action Items) 並條列出來。若無則回答無:\n\n${txt}`; } 
+            else { lt.textContent='AI 正在進行文法潤飾...'; p=`請將以下文字進行文法潤飾，去除贅字(如嗯、啊、然後)，使其變成一篇流暢、專業的文章，同時保留原意:\n\n${txt}`; }
+            
             try {
                 const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.7-flash:generateContent?key=${currentApiKey}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [{ role: "user", parts: [{ text: p }] }] }) });
-                const j = await r.json(); o.value = j?.candidates?.[0]?.content?.parts?.[0]?.text || '失敗';
-            } catch(e) { o.value = '錯誤'; } finally { l.classList.replace('flex', 'hidden'); }
+                const j = await r.json(); o.value = j?.candidates?.[0]?.content?.parts?.[0]?.text || '生成失敗，請再試一次。';
+                showToast('AI 分析完成', 'success');
+            } catch(e) { o.value = '網路或 API 連線錯誤。'; } finally { l.classList.replace('flex', 'hidden'); }
         }
     </script>
 </body>
