@@ -649,9 +649,12 @@
                 for (let chunk of chunks) {
                     if (!chunk.trim()) continue;
                     
-                    // 呼叫 Gemini 2.5 Flash Preview TTS 模型 (官方專屬語音發聲端點)
+                    // 【關鍵破解】：在文字前方強制加上官方指定的前綴指令 "TTS the following text:"
+                    // 這會強迫模型關閉問答功能，純粹將文字轉為音訊，且不會唸出這句指令。
+                    const ttsPrompt = `TTS the following text:\n${chunk}`;
+                    
                     const payload = {
-                        contents: [{ parts: [{ text: chunk }] }],
+                        contents: [{ parts: [{ text: ttsPrompt }] }],
                         generationConfig: {
                             responseModalities: ["AUDIO"],
                             speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Aoede" } } } 
@@ -664,10 +667,9 @@
                         body: JSON.stringify(payload)
                     });
 
-                    // 【核心修改】精準捕捉 Google 伺服器的真實報錯訊息
                     if (!response.ok) {
                         const errorData = await response.json();
-                        throw new Error(`Google 伺服器回應: ${errorData.error?.message || '狀態碼 ' + response.status}`);
+                        throw new Error(`${errorData.error?.message || '狀態碼 ' + response.status}`);
                     }
                     
                     const result = await response.json();
