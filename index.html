@@ -170,7 +170,7 @@
                         <i class="fas fa-file-audio" id="upload-icon"></i>
                     </div>
                     <p id="upload-text-main" class="text-slate-700 font-bold mb-1 transition-colors">點擊上傳，或將音檔拖曳至此</p>
-                    <p id="upload-text-sub" class="text-xs text-slate-500 bg-amber-50 inline-block px-2 py-1 rounded border border-amber-200"><i class="fas fa-info-circle text-amber-500"></i> 單檔最大支援 20MB (約 30 分鐘)。若檔案過大請先裁切，或直接使用下方錄音功能。</p>
+                    <p id="upload-text-sub" class="text-xs text-slate-500 bg-amber-50 inline-block px-2 py-1 rounded border border-amber-200"><i class="fas fa-info-circle text-amber-500"></i> 單檔最大支援 20MB。若會議較長，建議分段每 30 分鐘上傳一次，避免 AI 截斷。</p>
                     <p id="selected-file-info" class="hidden mt-4 text-sm font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 inline-block px-4 py-1.5 rounded-lg shadow-sm animate-fade-in"></p>
                 </div>
 
@@ -180,7 +180,7 @@
                     <div class="flex-1 h-px bg-gradient-to-l from-transparent to-slate-200"></div>
                 </div>
 
-                <!-- 錄音按鈕區 -->
+                <!-- 錄音按鈕區 (雙按鈕) -->
                 <div class="mt-4 flex flex-col sm:flex-row justify-center gap-4" id="btn-record-container">
                     <button id="btn-record" class="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-3.5 bg-slate-800 hover:bg-slate-900 text-white rounded-xl font-bold shadow-md hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5 group">
                         <i class="fas fa-microphone group-hover:scale-110 transition-transform"></i> 一般麥克風錄音
@@ -435,19 +435,6 @@
         </div>
     </div>
 
-    <!-- 雲端專案庫 Modal -->
-    <div id="modal-cloud" class="hidden fixed inset-0 z-[99999] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
-        <div id="modal-cloud-content" class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden scale-95 transition-transform duration-300 flex flex-col max-h-[85vh]">
-            <div class="bg-slate-50 px-6 py-4 border-b border-slate-100 flex justify-between items-center shrink-0">
-                <h3 class="font-bold text-slate-800 flex items-center gap-2 text-lg"><i class="fas fa-cloud text-blue-500"></i> 雲端專案庫 (Firestore + Storage)</h3>
-                <button id="btn-close-cloud-modal" class="text-slate-400 hover:text-red-500 transition-colors w-8 h-8 flex items-center justify-center rounded-full hover:bg-red-50"><i class="fas fa-times text-lg"></i></button>
-            </div>
-            <div class="p-6 overflow-y-auto flex-1 bg-slate-50/50" id="cloud-projects-list">
-                <!-- 專案列表動態生成於此 -->
-            </div>
-        </div>
-    </div>
-
     <!-- 30分鐘上限提醒 Modal -->
     <div id="modal-record-limit" class="hidden fixed inset-0 z-[99999] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
         <div id="modal-record-limit-content" class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden scale-95 transition-transform duration-300 flex flex-col">
@@ -459,6 +446,19 @@
                 <h4 class="text-xl font-bold text-slate-800 mb-2">已達到 30 分鐘錄音上限</h4>
                 <p class="text-slate-600 mb-6 text-sm">為了確保 AI 產出的逐字稿不會因為過長而被截斷，系統已自動將您前 30 分鐘的錄音安全保存。<br><br>請先點擊「開始 AI 處理」完成此段落，再重新開啟錄音繼續下一段。</p>
                 <button id="btn-close-record-limit" class="w-full py-3 bg-brand-500 hover:bg-brand-600 text-white rounded-xl font-bold shadow-md transition-all">我知道了，立即處理</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 雲端專案庫 Modal -->
+    <div id="modal-cloud" class="hidden fixed inset-0 z-[99999] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+        <div id="modal-cloud-content" class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden scale-95 transition-transform duration-300 flex flex-col max-h-[85vh]">
+            <div class="bg-slate-50 px-6 py-4 border-b border-slate-100 flex justify-between items-center shrink-0">
+                <h3 class="font-bold text-slate-800 flex items-center gap-2 text-lg"><i class="fas fa-cloud text-blue-500"></i> 雲端專案庫 (Firestore + Storage)</h3>
+                <button id="btn-close-cloud-modal" class="text-slate-400 hover:text-red-500 transition-colors w-8 h-8 flex items-center justify-center rounded-full hover:bg-red-50"><i class="fas fa-times text-lg"></i></button>
+            </div>
+            <div class="p-6 overflow-y-auto flex-1 bg-slate-50/50" id="cloud-projects-list">
+                <!-- 專案列表動態生成於此 -->
             </div>
         </div>
     </div>
@@ -533,7 +533,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, addDoc, deleteDoc, collection, getDocs, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, addDoc, updateDoc, deleteDoc, collection, getDocs, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
 
         // 寫死 TONY 老師的正式機專屬 Firebase 金鑰
@@ -559,6 +559,7 @@
             window.fsDoc = doc;
             window.fsGetDoc = getDoc;
             window.fsAddDoc = addDoc;
+            window.fsUpdateDoc = updateDoc;
             window.fsDeleteDoc = deleteDoc;
             window.fsCollection = collection;
             window.fsGetDocs = getDocs;
@@ -588,7 +589,7 @@
                 }
             };
 
-            // 純淨正式機監聽模式
+            // 純淨正式機監聽模式 (移除沙盒 Token 邏輯)
             onAuthStateChanged(auth, (user) => {
                 window.currentUser = user;
                 window.firebaseReady = true;
@@ -697,7 +698,7 @@
             // Google Login
             document.getElementById('btn-google-login')?.addEventListener('click', () => { 
                 if (window.loginWithGoogle) window.loginWithGoogle(); 
-                else window.showToast('系統初始化中，請稍候再試', 'warning');
+                else window.showToast('連線模組準備中，請稍候再試', 'warning');
             });
             document.getElementById('btn-logout')?.addEventListener('click', () => { if(window.logoutGoogle) window.logoutGoogle(); });
 
@@ -716,7 +717,7 @@
             document.getElementById('btn-close-guide')?.addEventListener('click', () => toggleModal('modal-guide', 'modal-guide-content'));
 
             document.getElementById('btn-close-record-limit')?.addEventListener('click', () => toggleModal('modal-record-limit', 'modal-record-limit-content'));
-            
+
             // Audio Core
             document.getElementById('btn-record')?.addEventListener('click', startRecording);
             document.getElementById('btn-record-system')?.addEventListener('click', startSystemRecording);
@@ -943,7 +944,7 @@
                                 <i class="fas ${p.audioUrl ? 'fa-file-audio' : 'fa-file-alt'} text-blue-500"></i>
                                 <span id="title-text-${p.id}" class="truncate max-w-[180px] sm:max-w-[300px]">${p.title}</span>
                                 <button onclick="startRename('${p.id}')" class="text-slate-400 hover:text-brand-500 transition-colors p-1" title="重新命名">
-                                    <i class="fas fa-edit"></i>
+                                    <i class="fas fa-pencil-alt"></i>
                                 </button>
                             </div>
                             <!-- 編輯模式 (預設隱藏) -->
@@ -1038,10 +1039,10 @@
             if (!newTitle) return window.showToast('名稱不能為空', 'warning');
             
             try {
+                if(typeof window.fsUpdateDoc !== 'function') throw new Error("Firebase 系統初始化未完成");
                 const docRef = window.fsDoc(window.cloudDb, 'artifacts', window.cloudAppId, 'users', window.currentUser.uid, 'projects', id);
                 await window.fsUpdateDoc(docRef, { title: newTitle });
                 
-                // 動態更新畫面文字，無需重新讀取整個雲端列表
                 document.getElementById(`title-text-${id}`).textContent = newTitle;
                 window.cancelRename(id);
                 window.showToast('✅ 專案名稱已更新', 'success');
