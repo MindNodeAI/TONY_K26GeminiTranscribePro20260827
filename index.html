@@ -992,36 +992,51 @@
         }
 
         window.playTranslatedAudio = async function() {
-            if(!currentApiKey) return showToast('需設定 API Key', 'error');
-            const text = document.getElementById('text-output').value.trim(); if (!text) return showToast('沒有可以朗讀的文字', 'warning');
-            const btn = document.getElementById('btn-play-audio'); const orig = btn.innerHTML; 
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1.5"></i>'; btn.disabled = true;
+            const text = document.getElementById('text-output').value.trim();
+            if (!text) return showToast('沒有可以朗讀的文字', 'warning');
+            
+            const btn = document.getElementById('btn-play-audio'); const orig = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1.5"></i>準備中'; btn.disabled = true;
 
             try {
-                // 使用 Google 官方正式版 Gemini 2.5 Pro TTS 引擎
-                const payload = {
-                    contents: [{ parts: [{ text: text }] }],
-                    generationConfig: { responseModalities: ["AUDIO"], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Aoede" } } } },
-                    model: "gemini-2.5-pro-preview-tts"
-                };
-                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro-preview-tts:generateContent?key=${currentApiKey}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-                const json = await res.json();
-                
-                const audioData = json?.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
-                const mimeType = json?.candidates?.[0]?.content?.parts?.[0]?.inlineData?.mimeType;
+                // 自動偵測使用者選擇的目標語言，並對應 Google 官方語言代碼
+                const tLang = document.getElementById('translation-target-lang').value;
+                let langCode = 'zh-TW';
+                if (tLang === 'English') langCode = 'en-US';
+                else if (tLang === '簡體中文') langCode = 'zh-CN';
+                else if (tLang === '日本語') langCode = 'ja';
+                else if (tLang === '한국어') langCode = 'ko';
+                else if (tLang === 'Español') langCode = 'es';
+                else if (tLang === 'ภาษาไทย') langCode = 'th';
+                else if (tLang === 'Bahasa Indonesia') langCode = 'id';
+                else if (tLang === 'Tiếng Việt') langCode = 'vi';
 
-                if (audioData && mimeType && mimeType.startsWith("audio/")) {
-                    const sampleRate = parseInt(mimeType.match(/rate=(\d+)/)[1], 10);
-                    const pcmData = base64ToArrayBuffer(audioData);
-                    const wavBlob = pcmToWav(pcmData, sampleRate);
-                    const audioUrl = URL.createObjectURL(wavBlob);
-                    
-                    const audio = new Audio(audioUrl);
-                    btn.innerHTML = '<i class="fas fa-volume-up text-brand-600 animate-pulse mr-1.5"></i>朗讀中';
-                    audio.onended = () => { btn.innerHTML = orig; btn.disabled = false; URL.revokeObjectURL(audioUrl); };
-                    audio.play();
-                } else { throw new Error('API 無法生成音頻'); }
-            } catch (e) { btn.innerHTML = orig; btn.disabled = false; showToast('語音生成失敗', 'error'); }
+                // 智慧分段演算法：突破語音 API 200 字限制，根據標點符號自動斷句
+                const chunks = []; let current = "";
+                const parts = text.split(/([。！？.!?\n]+)/);
+                for (let p of parts) {
+                    if (current.length + p.length > 150) { if (current) chunks.push(current); current = p; } 
+                    else current += p;
+                }
+                if (current) chunks.push(current);
+                
+                const finalChunks = [];
+                for (let c of chunks) {
+                    while (c.length > 150) { finalChunks.push(c.substring(0, 150)); c = c.substring(150); }
+                    if (c) finalChunks.push(c);
+                }
+
+                btn.innerHTML = '<i class="fas fa-volume-up text-brand-600 animate-pulse mr-1.5"></i>朗讀中';
+                
+                // 依序播放分段後的母語音軌
+                for (const chunk of finalChunks) {
+                    if (!chunk.trim()) continue;
+                    const url = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=${langCode}&q=${encodeURIComponent(chunk)}`;
+                    const audio = new Audio(url);
+                    await new Promise(r => { audio.onended = r; audio.onerror = r; audio.play().catch(r); });
+                }
+            } catch (e) { showToast('語音播放失敗', 'error'); } 
+            finally { btn.innerHTML = orig; btn.disabled = false; }
         };
 
         function exportToWord(tab) {
