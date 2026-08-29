@@ -1309,11 +1309,26 @@
                     const part = result?.candidates?.[0]?.content?.parts?.[0];
                     if (!part?.inlineData?.data) throw new Error('模型未回傳音訊檔案');
 
+                    // 1. 解析 Google 回傳的原始數據與取樣率
                     const audioBase64 = part.inlineData.data;
+                    const mimeType = part.inlineData.mimeType || "audio/pcm;rate=24000";
+                    const rateMatch = mimeType.match(/rate=(\d+)/);
+                    const sampleRate = rateMatch ? parseInt(rateMatch[1], 10) : 24000;
+
+                    // 2. 將 Base64 轉為 16-bit PCM 原始波形矩陣
                     const pcmData = base64ToArrayBuffer(audioBase64);
+                    const pcm16 = new Int16Array(pcmData); 
                     
+                    // 3. 建立瀏覽器音訊上下文
                     const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                    const audioBuffer = await audioContext.decodeAudioData(pcmData);
+                    
+                    // 4. 手動建立 AudioBuffer 並將 PCM 轉換為 Float32 (喇叭可播放的格式)
+                    const audioBuffer = audioContext.createBuffer(1, pcm16.length, sampleRate);
+                    const channelData = audioBuffer.getChannelData(0);
+                    for (let i = 0; i < pcm16.length; i++) {
+                        channelData[i] = pcm16[i] / 32768.0; // 將 16-bit 整數正規化為 -1.0 到 1.0 的浮點數
+                    }
+                    
                     const source = audioContext.createBufferSource();
                     source.buffer = audioBuffer;
                     source.connect(audioContext.destination);
