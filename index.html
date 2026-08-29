@@ -883,32 +883,57 @@
             reader.readAsText(file);
         }
 
-        // Firebase 雲端存檔 (含 Storage 音檔上傳)
+        // Firebase 雲端存檔 (判斷覆蓋或另存)
         async function saveCloudProject() {
             if (!window.firebaseReady || !window.currentUser) return window.showToast('雲端伺服器連線中，或請先登入帳號', 'warning');
+            
+            if (currentCloudProjectId) {
+                // 如果已經有載入紀錄，跳出詢問視窗
+                toggleModal('modal-save-options', 'modal-save-options-content');
+            } else {
+                // 全新專案，直接存檔
+                executeCloudSave(null);
+            }
+        }
+        
+        // 實際執行寫入 Firebase 的動作
+        async function executeCloudSave(docIdToUpdate) {
             const btn = document.getElementById('btn-cloud-save');
             const orig = btn.innerHTML; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 上傳中...'; btn.disabled = true;
             
             try {
                 let downloadUrl = null;
-                if (audioBlob && window.cloudStorage) {
+                // 只有當音檔是「新錄製/新上傳」的 (沒有 isCloudUrl 標記) 才需要上傳
+                if (audioBlob && !audioBlob.isCloudUrl && window.cloudStorage) {
                     window.showToast('正在上傳音檔至雲端儲存桶...', 'info');
                     const fileName = audioBlob.name || `audio_${Date.now()}.webm`;
                     const storageRef = window.fsRef(window.cloudStorage, `artifacts/${window.cloudAppId}/users/${window.currentUser.uid}/audio/${fileName}`);
                     await window.fsUploadBytes(storageRef, audioBlob);
                     downloadUrl = await window.fsGetDownloadURL(storageRef);
+                } else if (audioBlob && audioBlob.isCloudUrl) {
+                    // 如果是從雲端載入的舊音檔，保留舊網址
+                    downloadUrl = document.getElementById('audio-playback').src;
                 }
 
                 const projectData = {
-                    title: `雲端紀錄_${new Date().toLocaleString('zh-TW', { hour12: false, month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' })}`,
                     timestamp: new Date().getTime(),
-                    audioUrl: downloadUrl,
                     ...getProjectSnapshot()
                 };
+                if (downloadUrl) projectData.audioUrl = downloadUrl;
                 
-                const colRef = window.fsCollection(window.cloudDb, 'artifacts', window.cloudAppId, 'users', window.currentUser.uid, 'projects');
-                await window.fsAddDoc(colRef, projectData);
-                window.showToast('專案與音檔已成功備份至雲端 ☁️', 'success');
+                if (docIdToUpdate) {
+                    // 覆蓋原檔
+                    const docRef = window.fsDoc(window.cloudDb, 'artifacts', window.cloudAppId, 'users', window.currentUser.uid, 'projects', docIdToUpdate);
+                    await window.fsUpdateDoc(docRef, projectData);
+                    window.showToast('專案進度已成功覆蓋更新！', 'success');
+                } else {
+                    // 另存新檔 (需要給予標題)
+                    projectData.title = `雲端紀錄_${new Date().toLocaleString('zh-TW', { hour12: false, month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' })}`;
+                    const colRef = window.fsCollection(window.cloudDb, 'artifacts', window.cloudAppId, 'users', window.currentUser.uid, 'projects');
+                    const newDoc = await window.fsAddDoc(colRef, projectData);
+                    currentCloudProjectId = newDoc.id; // 更新當前綁定 ID
+                    window.showToast('專案與音檔已成功建立新檔 ☁️', 'success');
+                }
             } catch (error) { 
                 window.showToast(`雲端存檔失敗: ${error.message}`, 'error'); 
             } finally { 
