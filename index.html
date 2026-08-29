@@ -435,30 +435,23 @@
         </div>
     </div>
 
-    <!-- 30分鐘上限提醒 Modal -->
-    <div id="modal-record-limit" class="hidden fixed inset-0 z-[99999] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
-        <div id="modal-record-limit-content" class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden scale-95 transition-transform duration-300 flex flex-col">
-            <div class="bg-amber-50 px-6 py-4 border-b border-amber-100 flex justify-between items-center shrink-0">
-                <h3 class="font-bold text-amber-800 flex items-center gap-2 text-lg"><i class="fas fa-shield-alt text-amber-500"></i> 系統安全防護啟動</h3>
-            </div>
-            <div class="p-6 bg-white text-center">
-                <div class="w-16 h-16 bg-amber-100 text-amber-500 rounded-full flex items-center justify-center text-3xl mx-auto mb-4"><i class="fas fa-clock"></i></div>
-                <h4 class="text-xl font-bold text-slate-800 mb-2">已達到 30 分鐘錄音上限</h4>
-                <p class="text-slate-600 mb-6 text-sm">為了確保 AI 產出的逐字稿不會因為過長而被截斷，系統已自動將您前 30 分鐘的錄音安全保存。<br><br>請先點擊「開始 AI 處理」完成此段落，再重新開啟錄音繼續下一段。</p>
-                <button id="btn-close-record-limit" class="w-full py-3 bg-brand-500 hover:bg-brand-600 text-white rounded-xl font-bold shadow-md transition-all">我知道了，立即處理</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- 雲端專案庫 Modal -->
-    <div id="modal-cloud" class="hidden fixed inset-0 z-[99999] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
-        <div id="modal-cloud-content" class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden scale-95 transition-transform duration-300 flex flex-col max-h-[85vh]">
+    <!-- API 金鑰設定 Modal -->
+    <div id="modal-apikey" class="hidden fixed inset-0 z-[99999] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+        <div id="modal-apikey-content" class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden scale-95 transition-transform duration-300 flex flex-col">
             <div class="bg-slate-50 px-6 py-4 border-b border-slate-100 flex justify-between items-center shrink-0">
-                <h3 class="font-bold text-slate-800 flex items-center gap-2 text-lg"><i class="fas fa-cloud text-blue-500"></i> 雲端專案庫 (Firestore + Storage)</h3>
-                <button id="btn-close-cloud-modal" class="text-slate-400 hover:text-red-500 transition-colors w-8 h-8 flex items-center justify-center rounded-full hover:bg-red-50"><i class="fas fa-times text-lg"></i></button>
+                <h3 class="font-bold text-slate-800 flex items-center gap-2 text-lg"><i class="fas fa-key text-slate-600"></i> Gemini API 金鑰設定</h3>
+                <button id="btn-close-modal" class="text-slate-400 hover:text-red-500 transition-colors w-8 h-8 flex items-center justify-center rounded-full hover:bg-red-50"><i class="fas fa-times text-lg"></i></button>
             </div>
-            <div class="p-6 overflow-y-auto flex-1 bg-slate-50/50" id="cloud-projects-list">
-                <!-- 專案列表動態生成於此 -->
+            <div class="p-6 bg-white">
+                <p class="text-sm text-slate-600 mb-4">系統需要您的 Gemini API 金鑰才能運作。您的金鑰僅儲存於本機瀏覽器，不會外洩。</p>
+                <div class="mb-6">
+                    <label class="block text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider">您的 API Key</label>
+                    <input type="password" id="input-api-key" placeholder="AIzaSy..." class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all shadow-inner">
+                </div>
+                <div class="flex flex-col gap-3">
+                    <button id="btn-save-key" class="w-full py-3 bg-brand-500 hover:bg-brand-600 text-white rounded-xl font-bold shadow-md transition-all flex items-center justify-center gap-2">儲存並驗證</button>
+                    <a href="https://aistudio.google.com/app/apikey" target="_blank" class="w-full py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl font-bold transition-all flex items-center justify-center gap-2 text-sm"><i class="fas fa-external-link-alt"></i> 免費申請 Google API 金鑰</a>
+                </div>
             </div>
         </div>
     </div>
@@ -508,23 +501,45 @@
         </div>
     </div>
 
-    <!-- API 金鑰設定 Modal -->
-    <div id="modal-apikey" class="hidden fixed inset-0 z-[99999] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
-        <div id="modal-apikey-content" class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden scale-95 transition-transform duration-300 flex flex-col">
-            <div class="bg-slate-50 px-6 py-4 border-b border-slate-100 flex justify-between items-center shrink-0">
-                <h3 class="font-bold text-slate-800 flex items-center gap-2 text-lg"><i class="fas fa-key text-slate-600"></i> Gemini API 金鑰設定</h3>
-                <button id="btn-close-modal" class="text-slate-400 hover:text-red-500 transition-colors w-8 h-8 flex items-center justify-center rounded-full hover:bg-red-50"><i class="fas fa-times text-lg"></i></button>
+    <!-- 30分鐘上限提醒 Modal -->
+    <div id="modal-record-limit" class="hidden fixed inset-0 z-[99999] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+        <div id="modal-record-limit-content" class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden scale-95 transition-transform duration-300 flex flex-col">
+            <div class="bg-amber-50 px-6 py-4 border-b border-amber-100 flex justify-between items-center shrink-0">
+                <h3 class="font-bold text-amber-800 flex items-center gap-2 text-lg"><i class="fas fa-shield-alt text-amber-500"></i> 系統安全防護啟動</h3>
+                <button id="btn-close-record-limit" class="text-amber-600 hover:text-red-500 transition-colors w-8 h-8 flex items-center justify-center rounded-full hover:bg-amber-100"><i class="fas fa-times text-lg"></i></button>
             </div>
-            <div class="p-6 bg-white">
-                <p class="text-sm text-slate-600 mb-4">系統需要您的 Gemini API 金鑰才能運作。您的金鑰僅儲存於本機瀏覽器，不會外洩。</p>
-                <div class="mb-6">
-                    <label class="block text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider">您的 API Key</label>
-                    <input type="password" id="input-api-key" placeholder="AIzaSy..." class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all shadow-inner">
-                </div>
-                <div class="flex flex-col gap-3">
-                    <button id="btn-save-key" class="w-full py-3 bg-brand-500 hover:bg-brand-600 text-white rounded-xl font-bold shadow-md transition-all flex items-center justify-center gap-2">儲存並驗證</button>
-                    <a href="https://aistudio.google.com/app/apikey" target="_blank" class="w-full py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl font-bold transition-all flex items-center justify-center gap-2 text-sm"><i class="fas fa-external-link-alt"></i> 免費申請 Google API 金鑰</a>
-                </div>
+            <div class="p-6 bg-white text-center">
+                <div class="w-16 h-16 bg-amber-100 text-amber-500 rounded-full flex items-center justify-center text-3xl mx-auto mb-4"><i class="fas fa-clock"></i></div>
+                <h4 class="text-xl font-bold text-slate-800 mb-2">已達到 30 分鐘錄音上限</h4>
+                <p class="text-slate-600 mb-6 text-sm">為了確保 AI 產出的逐字稿不會因為過長而被截斷，系統已自動將您前 30 分鐘的錄音安全保存。<br><br>請先點擊「開始 AI 處理」完成此段落，再重新開啟錄音繼續下一段。</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 儲存選項確認 Modal (另存新檔 vs 覆蓋) -->
+    <div id="modal-save-options" class="hidden fixed inset-0 z-[99999] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+        <div id="modal-save-options-content" class="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden scale-95 transition-transform duration-300 flex flex-col">
+            <div class="bg-blue-50 px-6 py-4 border-b border-blue-100 flex justify-between items-center shrink-0">
+                <h3 class="font-bold text-blue-800 flex items-center gap-2 text-lg"><i class="fas fa-save text-blue-500"></i> 儲存雲端專案</h3>
+                <button id="btn-close-save-options" class="text-blue-400 hover:text-red-500 transition-colors w-8 h-8 flex items-center justify-center rounded-full hover:bg-blue-100"><i class="fas fa-times text-lg"></i></button>
+            </div>
+            <div class="p-6 bg-white flex flex-col gap-3">
+                <p class="text-sm text-slate-600 mb-2 text-center">您正在編輯一個已存在的雲端專案，請問要如何儲存？</p>
+                <button id="btn-save-overwrite" class="w-full py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-xl font-bold shadow-md transition-all flex items-center justify-center gap-2"><i class="fas fa-file-import"></i> 覆蓋原專案 (Update)</button>
+                <button id="btn-save-new" class="w-full py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-bold shadow-md transition-all flex items-center justify-center gap-2"><i class="fas fa-copy"></i> 另存為新專案 (Save As)</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 雲端專案庫 Modal -->
+    <div id="modal-cloud" class="hidden fixed inset-0 z-[99999] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+        <div id="modal-cloud-content" class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden scale-95 transition-transform duration-300 flex flex-col max-h-[85vh]">
+            <div class="bg-slate-50 px-6 py-4 border-b border-slate-100 flex justify-between items-center shrink-0">
+                <h3 class="font-bold text-slate-800 flex items-center gap-2 text-lg"><i class="fas fa-cloud text-blue-500"></i> 雲端專案庫 (Firestore + Storage)</h3>
+                <button id="btn-close-cloud-modal" class="text-slate-400 hover:text-red-500 transition-colors w-8 h-8 flex items-center justify-center rounded-full hover:bg-red-50"><i class="fas fa-times text-lg"></i></button>
+            </div>
+            <div class="p-6 overflow-y-auto flex-1 bg-slate-50/50" id="cloud-projects-list">
+                <!-- 專案列表動態生成於此 -->
             </div>
         </div>
     </div>
@@ -536,7 +551,6 @@
         import { getFirestore, doc, getDoc, addDoc, updateDoc, deleteDoc, collection, getDocs, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
 
-        // 寫死 TONY 老師的正式機專屬 Firebase 金鑰
         const firebaseConfig = {
             apiKey: "AIzaSyB7KwhWyC3Gt8LeOLBgaxcrmYwr8BAHwmg",
             authDomain: "k18-tony-firebase.firebaseapp.com",
@@ -568,7 +582,6 @@
             window.fsUploadBytes = uploadBytes;
             window.fsGetDownloadURL = getDownloadURL;
 
-            // Google Login Handlers
             window.loginWithGoogle = async () => {
                 const provider = new GoogleAuthProvider();
                 try {
@@ -589,7 +602,6 @@
                 }
             };
 
-            // 純淨正式機監聽模式 (移除沙盒 Token 邏輯)
             onAuthStateChanged(auth, (user) => {
                 window.currentUser = user;
                 window.firebaseReady = true;
@@ -609,6 +621,7 @@
 
         // 全域狀態變數
         let currentApiKey = localStorage.getItem('gemini_api_key') || '';
+        let currentCloudProjectId = null; // 記住當前編輯的雲端專案 ID
         let mediaRecorder; 
         let audioChunks = []; 
         let audioBlob = null; 
@@ -758,6 +771,11 @@
             document.getElementById('btn-cloud-load')?.addEventListener('click', openCloudModal);
             document.getElementById('btn-close-cloud-modal')?.addEventListener('click', closeCloudModal);
 
+            // Cloud Save Options Events
+            document.getElementById('btn-save-overwrite')?.addEventListener('click', () => { toggleModal('modal-save-options', 'modal-save-options-content'); executeCloudSave(currentCloudProjectId); });
+            document.getElementById('btn-save-new')?.addEventListener('click', () => { toggleModal('modal-save-options', 'modal-save-options-content'); executeCloudSave(null); });
+            document.getElementById('btn-close-save-options')?.addEventListener('click', () => toggleModal('modal-save-options', 'modal-save-options-content'));
+
             // Drag & Drop Upload
             const fileUploadEl = document.getElementById('file-upload');
             if (fileUploadEl) fileUploadEl.addEventListener('change', handleFileUpload);
@@ -813,6 +831,31 @@
             finally { btn.innerHTML = orig; btn.disabled = false; }
         }
 
+        // 清除畫布 (載入前使用)
+        function resetWorkspace() {
+            document.getElementById('stt-source-text').innerHTML = '';
+            document.getElementById('stt-translated-text').innerHTML = '';
+            document.getElementById('ai-assistant-output').innerHTML = '';
+            document.getElementById('text-input').value = '';
+            document.getElementById('text-output').innerHTML = '';
+            document.getElementById('custom-vocab').value = '';
+            
+            document.getElementById('audio-playback-container').classList.add('hidden');
+            document.getElementById('audio-playback').src = '';
+            document.getElementById('selected-file-info').classList.add('hidden');
+            document.getElementById('selected-file-info').innerHTML = '';
+            
+            document.getElementById('btn-process-audio').disabled = true;
+            document.getElementById('stt-output-section').classList.add('hidden');
+            
+            const icon = document.getElementById('upload-icon');
+            if(icon) icon.className = "fas fa-file-audio";
+            
+            audioBlob = null;
+            audioBase64 = null;
+            currentCloudProjectId = null;
+        }
+
         // 專案快照 (富文本支援)
         function getProjectSnapshot() {
             return {
@@ -860,6 +903,7 @@
             const reader = new FileReader();
             reader.onload = async (e) => {
                 try {
+                    resetWorkspace(); // 載入前先清空
                     const data = JSON.parse(e.target.result);
                     restoreProjectSnapshot(data);
                     
@@ -964,15 +1008,13 @@
                 listEl.innerHTML = projects.map(p => `
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center p-5 bg-white border border-slate-200 rounded-xl mb-3 hover:border-blue-300 hover:shadow-md transition-all group">
                         <div class="mb-4 sm:mb-0 w-full sm:w-auto flex-1 pr-4">
-                            <!-- 顯示模式 -->
-                            <div id="title-view-${p.id}" class="font-bold text-slate-800 text-base flex items-center gap-2">
+                            <div id="title-view-${p.id}" class="font-bold text-slate-800 text-base flex items-center gap-2 group/title">
                                 <i class="fas ${p.audioUrl ? 'fa-file-audio' : 'fa-file-alt'} text-blue-500"></i>
                                 <span id="title-text-${p.id}" class="truncate max-w-[180px] sm:max-w-[300px]">${p.title}</span>
                                 <button onclick="startRename('${p.id}')" class="text-slate-400 hover:text-brand-500 transition-colors p-1" title="重新命名">
-                                    <i class="fas fa-pencil-alt"></i>
+                                    <i class="fas fa-pencil-alt text-xs"></i>
                                 </button>
                             </div>
-                            <!-- 編輯模式 (預設隱藏) -->
                             <div id="title-edit-${p.id}" class="hidden items-center gap-2 mt-1">
                                 <i class="fas ${p.audioUrl ? 'fa-file-audio' : 'fa-file-alt'} text-blue-500"></i>
                                 <input type="text" id="input-rename-${p.id}" value="${p.title}" class="px-2 py-1 text-sm border border-brand-300 rounded focus:outline-none focus:ring-1 focus:ring-brand-500 w-[150px] sm:w-[250px]">
@@ -1067,7 +1109,7 @@
             if (!newTitle) return window.showToast('名稱不能為空', 'warning');
             
             try {
-                if(typeof window.fsUpdateDoc !== 'function') throw new Error("Firebase 系統初始化未完成");
+                if(typeof window.fsUpdateDoc !== 'function') throw new Error("Firebase 更新模組載入失敗");
                 const docRef = window.fsDoc(window.cloudDb, 'artifacts', window.cloudAppId, 'users', window.currentUser.uid, 'projects', id);
                 await window.fsUpdateDoc(docRef, { title: newTitle });
                 
@@ -1149,6 +1191,7 @@
                 
                 document.getElementById('btn-process-audio').disabled = false;
                 window.showToast('音檔載入就緒，可開始 AI 處理', 'success');
+                currentCloudProjectId = null; // 上傳新檔案，清除原本綁定的 ID
             } catch (err) { window.showToast('音檔讀取失敗', 'error'); }
         }
 
@@ -1177,7 +1220,7 @@
                     stream.getTracks().forEach(t => t.stop());
                 };
                 
-                mediaRecorder.start(100); isRecording = true; recordSeconds = 0;
+                mediaRecorder.start(100); isRecording = true; recordSeconds = 0; currentCloudProjectId = null;
                 document.getElementById('btn-record-container').classList.add('hidden'); 
                 document.getElementById('recording-indicator').classList.remove('hidden');
                 document.getElementById('recording-indicator').classList.add('flex');
@@ -1226,7 +1269,7 @@
                     stream.getTracks().forEach(t => t.stop());
                 };
                 
-                mediaRecorder.start(100); isRecording = true; recordSeconds = 0;
+                mediaRecorder.start(100); isRecording = true; recordSeconds = 0; currentCloudProjectId = null;
                 document.getElementById('btn-record-container').classList.add('hidden'); 
                 document.getElementById('recording-indicator').classList.remove('hidden');
                 document.getElementById('recording-indicator').classList.add('flex');
