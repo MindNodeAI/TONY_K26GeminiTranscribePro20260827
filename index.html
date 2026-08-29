@@ -69,7 +69,7 @@
 <body class="bg-slate-50 min-h-screen flex flex-col font-sans text-slate-800 selection:bg-brand-200 selection:text-brand-900">
 
     <!-- 全域 Toast 容器 -->
-    <div id="toast-container" class="fixed top-5 right-5 z-[9999] flex flex-col gap-3 pointer-events-none"></div>
+    <div id="toast-container" class="fixed top-5 right-5 z-[999999] flex flex-col gap-3 pointer-events-none"></div>
 
     <!-- 導覽列 -->
     <nav class="bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-sm sticky top-0 z-50 transition-all">
@@ -85,6 +85,10 @@
             
             <!-- 右側功能區塊 -->
             <div class="flex items-center gap-2 sm:gap-3">
+                <button id="btn-user-guide" class="hidden md:flex items-center gap-2 px-3 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg text-sm font-bold transition-all shadow-sm border border-emerald-200 hover:-translate-y-0.5">
+                    <i class="fas fa-book"></i>
+                    <span>操作指南</span>
+                </button>
                 <button id="btn-creator-info" class="hidden md:flex items-center gap-2 px-3 py-2 bg-brand-50 hover:bg-brand-100 text-brand-700 rounded-lg text-sm font-bold transition-all shadow-sm border border-brand-200 hover:-translate-y-0.5">
                     <i class="fas fa-user-tie"></i>
                     <span>TONY 顧問</span>
@@ -120,7 +124,7 @@
         
         <!-- Tab 導覽列 -->
         <div class="flex bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden shrink-0 p-1 gap-1 max-w-xl mx-auto w-full">
-            <button id="tab-btn-stt" class="flex-1 py-3 text-sm font-bold tab-active rounded-lg transition-all duration-300 flex justify-center items-center gap-2">
+            <button id="tab-btn-stt" class="flex-1 py-3 text-sm font-bold tab-active rounded-lg transition-all duration-300 flex justify-center items-center gap-2 shadow-sm">
                 <i class="fas fa-wave-square"></i> 語音轉錄 (STT)
             </button>
             <button id="tab-btn-translate" class="flex-1 py-3 text-sm font-bold tab-inactive rounded-lg transition-all duration-300 flex justify-center items-center gap-2">
@@ -138,15 +142,17 @@
                     
                     <!-- 專案存取功能 (雲端 + 本機) -->
                     <div class="flex flex-wrap gap-2 items-center bg-slate-50 p-1.5 rounded-lg border border-slate-100">
-                        <button id="btn-cloud-save" class="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-md text-xs font-bold transition-all flex items-center gap-1.5 border border-blue-200 hover:shadow-sm" title="將當前進度與音檔同步至雲端">
+                        <!-- 雲端專案按鈕 (藍色系) -->
+                        <button id="btn-cloud-save" class="px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white rounded-md text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm hover:shadow-md hover:-translate-y-0.5" title="將當前進度與音檔同步至雲端">
                             <i class="fas fa-cloud-upload-alt"></i> 雲端存檔
                         </button>
-                        <button id="btn-cloud-load" class="px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white rounded-md text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm hover:shadow-md" title="開啟雲端專案庫">
+                        <button id="btn-cloud-load" class="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-md text-xs font-bold transition-all flex items-center gap-1.5 border border-blue-200 shadow-sm" title="開啟雲端專案庫">
                             <i class="fas fa-cloud"></i> 雲端專案庫
                         </button>
                         
                         <div class="w-px h-5 bg-slate-300 mx-1 hidden sm:block"></div>
                         
+                        <!-- 本機專案按鈕 (灰色系) -->
                         <input type="file" id="load-project-input" accept=".json" class="hidden">
                         <button id="btn-load-project" class="px-3 py-1.5 bg-white hover:bg-slate-50 text-slate-600 rounded-md text-xs font-bold transition-all flex items-center gap-1.5 border border-slate-200" title="載入本機端專案檔 (.json)">
                             <i class="fas fa-folder-open"></i> 本機載入
@@ -164,7 +170,7 @@
                         <i class="fas fa-file-audio" id="upload-icon"></i>
                     </div>
                     <p id="upload-text-main" class="text-slate-700 font-bold mb-1 transition-colors">點擊上傳，或將音檔拖曳至此</p>
-                    <p id="upload-text-sub" class="text-xs text-slate-400">支援 MP3, WAV, M4A, MP4 (最大 20MB)</p>
+                    <p id="upload-text-sub" class="text-xs text-slate-500 bg-amber-50 inline-block px-2 py-1 rounded border border-amber-200"><i class="fas fa-info-circle text-amber-500"></i> 單檔最大支援 20MB (約 30 分鐘)。若檔案過大請先裁切，或直接使用下方錄音功能。</p>
                     <p id="selected-file-info" class="hidden mt-4 text-sm font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 inline-block px-4 py-1.5 rounded-lg shadow-sm animate-fade-in"></p>
                 </div>
 
@@ -176,10 +182,10 @@
 
                 <!-- 錄音按鈕區 -->
                 <div class="mt-4 flex flex-col sm:flex-row justify-center gap-4" id="btn-record-container">
-                    <button id="btn-record" class="flex items-center justify-center gap-2 px-6 py-3.5 bg-slate-800 hover:bg-slate-900 text-white rounded-xl font-bold shadow-md hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5 group">
+                    <button id="btn-record" class="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-3.5 bg-slate-800 hover:bg-slate-900 text-white rounded-xl font-bold shadow-md hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5 group">
                         <i class="fas fa-microphone group-hover:scale-110 transition-transform"></i> 一般麥克風錄音
                     </button>
-                    <button id="btn-record-system" class="flex items-center justify-center gap-2 px-6 py-3.5 bg-red-500 hover:bg-red-600 text-white rounded-xl font-bold shadow-md hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5 group">
+                    <button id="btn-record-system" class="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-3.5 bg-red-500 hover:bg-red-600 text-white rounded-xl font-bold shadow-md hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5 group">
                         <i class="fab fa-youtube group-hover:scale-110 transition-transform"></i> 擷取分頁 / YouTube 音訊
                     </button>
                 </div>
@@ -228,7 +234,7 @@
                     <input type="text" id="custom-vocab" placeholder="自訂優先詞庫 (例如：特定人名、醫學專有名詞，以逗號分隔)" class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all shadow-inner">
                 </div>
                 
-                <button id="btn-process-audio" disabled class="w-full py-4 bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-700 disabled:from-slate-300 disabled:to-slate-300 disabled:cursor-not-allowed text-white rounded-xl font-bold shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-2 text-base relative overflow-hidden disabled:shadow-none">
+                <button id="btn-process-audio" disabled class="w-full py-4 bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-700 disabled:from-slate-300 disabled:to-slate-300 disabled:cursor-not-allowed text-white rounded-xl font-bold shadow-lg transition-all duration-300 flex items-center justify-center gap-2 text-base relative overflow-hidden disabled:shadow-none hover:-translate-y-0.5">
                     <i class="fas fa-magic"></i> <span id="btn-process-audio-text">開始 AI 語音處理</span>
                 </button>
             </div>
@@ -243,7 +249,7 @@
                         <div class="flex gap-2">
                             <button id="btn-copy-stt" class="w-9 h-9 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-500 hover:text-brand-600 flex items-center justify-center transition-colors border border-slate-200 shadow-sm" title="複製內容"><i class="far fa-copy"></i></button>
                             <button id="btn-export-srt" class="hidden px-3 py-1.5 rounded-lg bg-purple-50 hover:bg-purple-100 text-purple-600 flex items-center justify-center gap-1.5 text-xs font-bold transition-all border border-purple-200 shadow-sm" title="下載 SRT 檔"><i class="fas fa-file-code"></i> 儲存 SRT</button>
-                            <button id="btn-word-stt" class="px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-600 text-blue-600 hover:text-white flex items-center gap-1.5 text-xs font-bold transition-all shadow-sm border border-blue-200" title="匯出帶有排版的 Word 檔"><i class="fas fa-file-word"></i> 儲存 Word</button>
+                            <button id="btn-word-stt" class="px-4 py-2 rounded-lg bg-blue-50 hover:bg-blue-600 text-blue-600 hover:text-white flex items-center justify-center gap-2 text-sm font-bold transition-all shadow-sm border border-blue-200" title="匯出帶有排版的 Word 檔"><i class="fas fa-file-word"></i> 儲存 Word</button>
                         </div>
                     </div>
                     
@@ -254,8 +260,7 @@
                         <div class="skeleton-loader w-1-2"></div>
                     </div>
                     
-                    <!-- 富文本編輯區 -->
-                    <div id="stt-source-text" contenteditable="true" class="w-full min-h-[160px] p-5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-400 overflow-y-auto prose prose-slate prose-sm prose-p:leading-relaxed prose-strong:text-red-700 prose-strong:bg-red-50 prose-strong:px-1 prose-strong:rounded max-w-none shadow-inner transition-all" placeholder="AI 逐字稿結果將顯示於此，您可直接點擊修改內容..."></div>
+                    <div id="stt-source-text" contenteditable="true" class="w-full min-h-[160px] p-5 bg-slate-50/50 border border-slate-200 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-brand-400 overflow-y-auto prose prose-slate prose-p:leading-relaxed prose-strong:text-red-700 prose-strong:bg-red-50 prose-strong:px-1 prose-strong:rounded max-w-none shadow-inner transition-all" placeholder="AI 逐字稿結果將顯示於此，您可直接點擊修改內容..."></div>
                 </div>
 
                 <!-- 翻譯結果 (富文本) -->
@@ -264,7 +269,7 @@
                         <h3 class="font-bold text-slate-800 flex items-center gap-2"><i class="fas fa-language text-emerald-500"></i> 翻譯結果</h3>
                         <div class="flex gap-2">
                             <button id="btn-copy-trans" class="w-9 h-9 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-500 hover:text-brand-600 flex items-center justify-center transition-colors border border-slate-200 shadow-sm" title="複製內容"><i class="far fa-copy"></i></button>
-                            <button id="btn-word-trans" class="px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-600 text-blue-600 hover:text-white flex items-center gap-1.5 text-xs font-bold transition-all shadow-sm border border-blue-200" title="匯出帶有排版的 Word 檔"><i class="fas fa-file-word"></i> 儲存 Word</button>
+                            <button id="btn-word-trans" class="px-4 py-2 rounded-lg bg-blue-50 hover:bg-blue-600 text-blue-600 hover:text-white flex items-center justify-center gap-2 text-sm font-bold transition-all shadow-sm border border-blue-200" title="匯出帶有排版的 Word 檔"><i class="fas fa-file-word"></i> 儲存 Word</button>
                         </div>
                     </div>
                     
@@ -274,8 +279,7 @@
                         <div class="skeleton-loader w-1-2"></div>
                     </div>
                     
-                    <!-- 富文本編輯區 -->
-                    <div id="stt-translated-text" contenteditable="true" class="w-full min-h-[120px] p-5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 overflow-y-auto prose prose-slate prose-sm prose-p:leading-relaxed prose-strong:text-emerald-700 prose-strong:bg-emerald-50 prose-strong:px-1 prose-strong:rounded max-w-none shadow-inner transition-all" placeholder="若有勾選自動翻譯，結果將顯示於此..."></div>
+                    <div id="stt-translated-text" contenteditable="true" class="w-full min-h-[120px] p-5 bg-slate-50/50 border border-slate-200 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-emerald-400 overflow-y-auto prose prose-slate prose-p:leading-relaxed prose-strong:text-emerald-700 prose-strong:bg-emerald-50 prose-strong:px-1 prose-strong:rounded max-w-none shadow-inner transition-all" placeholder="若有勾選自動翻譯，結果將顯示於此..."></div>
                 </div>
 
                 <!-- AI 智慧助手 -->
@@ -301,7 +305,6 @@
                         <span id="ai-assistant-loading-text" class="text-slate-300 text-sm font-bold tracking-wide">AI 正在套用企業排版分析中...</span>
                     </div>
                     
-                    <!-- 富文本編輯區 -->
                     <div id="ai-assistant-output" contenteditable="true" class="w-full min-h-[200px] p-5 bg-slate-900/80 backdrop-blur border border-slate-600/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 overflow-y-auto prose prose-invert prose-sm prose-p:leading-relaxed prose-headings:text-brand-300 prose-strong:text-red-400 prose-strong:bg-red-900/30 prose-strong:px-1 prose-strong:rounded prose-li:text-slate-200 prose-p:text-slate-200 max-w-none shadow-inner relative z-10 transition-all" placeholder="點擊上方按鈕生成具有精美排版的 AI 分析..."></div>
                 </div>
             </div>
@@ -342,7 +345,7 @@
                 <h3 class="font-bold text-slate-700 mb-2 flex items-center gap-2"><i class="fas fa-keyboard text-brand-500"></i> 輸入原文</h3>
                 <textarea id="text-input" class="w-full h-40 p-5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-400 resize-y transition-all shadow-inner" placeholder="請在此輸入要翻譯的文字... (支援多段落)"></textarea>
                 
-                <button id="btn-translate-text" class="w-full mt-5 py-4 bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-700 text-white rounded-xl font-bold shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-2 text-base disabled:opacity-70 disabled:cursor-not-allowed">
+                <button id="btn-translate-text" class="w-full mt-5 py-4 bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-700 text-white rounded-xl font-bold shadow-lg transition-all duration-300 flex items-center justify-center gap-2 text-base disabled:opacity-70 disabled:cursor-not-allowed hover:-translate-y-0.5">
                     <i class="fas fa-language text-lg"></i> <span id="btn-translate-text-label">開始智慧翻譯</span>
                 </button>
             </div>
@@ -368,7 +371,6 @@
                     </div>
                 </div>
                 
-                <!-- 富文本編輯區 -->
                 <div id="text-output" contenteditable="true" class="w-full min-h-[200px] p-5 bg-slate-50/50 border border-slate-200 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-brand-400 overflow-y-auto prose prose-slate prose-p:leading-relaxed prose-strong:text-red-700 prose-strong:bg-red-50 prose-strong:px-1 prose-strong:rounded max-w-none shadow-inner transition-all" placeholder="翻譯結果將顯示於此，您可直接點擊進行細部編輯..."></div>
             </div>
         </section>
@@ -384,93 +386,49 @@
 
     <!-- ================= Modals (彈出視窗) ================= -->
     
-    <!-- API Key 設定 Modal -->
-    <div id="modal-apikey" class="hidden fixed inset-0 z-[99999] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
-        <div id="modal-apikey-content" class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden scale-95 transition-transform duration-300">
-            <div class="bg-slate-50 px-6 py-4 border-b border-slate-100 flex justify-between items-center">
-                <h3 class="font-bold text-slate-800 flex items-center gap-2 text-lg"><i class="fas fa-key text-brand-600"></i> 系統 API 金鑰設定</h3>
-                <button id="btn-close-modal" class="text-slate-400 hover:text-red-500 transition-colors w-8 h-8 flex items-center justify-center rounded-full hover:bg-red-50"><i class="fas fa-times text-lg"></i></button>
-            </div>
-            <div class="p-6">
-                <!-- 優化後的引導申請提示 -->
-                <div class="text-sm text-slate-600 mb-5 leading-relaxed bg-blue-50 p-4 rounded-xl border border-blue-100">
-                    <p class="mb-2"><i class="fas fa-shield-alt text-blue-500 mr-1"></i> 請輸入您的 Google Gemini API Key。金鑰僅安全儲存於您的瀏覽器本地端，不會回傳至伺服器。</p>
-                    <a href="https://aistudio.google.com/app/apikey" target="_blank" class="inline-flex items-center gap-1.5 text-brand-600 hover:text-brand-700 font-bold hover:underline transition-colors bg-white px-3 py-1.5 rounded-lg border border-brand-200 shadow-sm mt-1">
-                        <i class="fas fa-external-link-alt text-xs"></i> 點此前往 Google 免費申請 API Key
-                    </a>
+    <!-- 操作指南 Modal -->
+    <div id="modal-guide" class="hidden fixed inset-0 z-[99999] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+        <div id="modal-guide-content" class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl overflow-hidden scale-95 transition-transform duration-300 max-h-[90vh] flex flex-col">
+            <div class="bg-slate-50 px-6 py-4 border-b border-slate-100 flex justify-between items-center shrink-0">
+                <h3 class="font-bold text-slate-800 flex items-center gap-2 text-lg"><i class="fas fa-book-reader text-brand-600"></i> 系統操作使用手冊</h3>
+                <div class="flex items-center gap-3">
+                    <button id="btn-word-guide" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-bold shadow-sm transition-all flex items-center gap-2 hover:-translate-y-0.5"><i class="fas fa-file-word"></i> 下載 Word 手冊</button>
+                    <button id="btn-close-guide" class="text-slate-400 hover:text-red-500 transition-colors w-8 h-8 flex items-center justify-center rounded-full hover:bg-red-50"><i class="fas fa-times text-lg"></i></button>
                 </div>
-                <input type="password" id="input-api-key" placeholder="AIzaSy..." class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 outline-none mb-5 font-mono shadow-inner tracking-widest">
-                <button id="btn-save-key" class="w-full py-3.5 bg-slate-800 hover:bg-slate-900 text-white rounded-xl font-bold shadow-md transition-all hover:-translate-y-0.5">驗證並安全儲存</button>
             </div>
-        </div>
-    </div>
+            <div class="p-6 overflow-y-auto custom-scrollbar flex-1 bg-white">
+                <div id="guide-content" class="prose prose-slate max-w-none">
+                    <h2 class="text-center text-brand-700 border-b pb-4">TONY STUDIO 企業級 AI 語音與翻譯中心 - 官方操作指南</h2>
+                    
+                    <h3 class="text-brand-600"><i class="fas fa-key"></i> 1. 系統初始化 (API 金鑰設定)</h3>
+                    <p>本系統由 Google Gemini 驅動。首次使用請點擊右上角「<strong>API 設定</strong>」，輸入您的專屬 Gemini API Key。若無金鑰，設定視窗內提供 Google 官方免費申請連結。</p>
 
-    <!-- TONY 顧問 創作者簡介 Modal -->
-    <div id="modal-creator" class="hidden fixed inset-0 z-[99999] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
-        <div id="modal-creator-content" class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden scale-95 transition-transform duration-300 max-h-[90vh] flex flex-col">
-            <div class="bg-gradient-to-r from-slate-800 to-slate-900 px-6 py-5 border-b border-slate-700 flex justify-between items-center shrink-0 relative overflow-hidden">
-                <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
-                <h3 class="font-bold text-white flex items-center gap-2 text-lg relative z-10"><i class="fas fa-id-card text-brand-400"></i> 創作者簡介</h3>
-                <button id="btn-close-creator" class="text-slate-300 hover:text-white transition-colors w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-700 relative z-10"><i class="fas fa-times text-lg"></i></button>
-            </div>
-            <div class="p-6 sm:p-8 overflow-y-auto bg-slate-50 custom-scrollbar">
-                <div class="flex flex-col sm:flex-row gap-8 items-start">
-                    <!-- 照片區 -->
-                    <div class="shrink-0 mx-auto sm:mx-0 flex flex-col items-center">
-                        <img src="https://i.postimg.cc/Gh8Zt7SX/S_56844323.jpg" alt="TONY 楊文澤 老師" class="w-40 h-40 rounded-full object-cover border-4 border-white shadow-xl mb-4 relative z-10">
-                        <div class="w-32 h-2 bg-slate-200/50 rounded-full blur-md -mt-6"></div>
-                    </div>
-                    <!-- 資料區 -->
-                    <div class="flex-1 w-full">
-                        <h2 class="text-3xl font-black text-slate-800 mb-1 tracking-tight">TONY 楊文澤 <span class="text-lg font-bold text-slate-500 ml-1">老師</span></h2>
-                        <div class="flex flex-wrap gap-2 mb-6 mt-2">
-                            <span class="px-3 py-1 bg-brand-100 text-brand-700 text-xs font-bold rounded-full">資深數位行銷科技顧問</span>
-                            <span class="px-3 py-1 bg-purple-100 text-purple-700 text-xs font-bold rounded-full">生成式 AI 創作者</span>
-                            <span class="px-3 py-1 bg-amber-100 text-amber-700 text-xs font-bold rounded-full">創業導師</span>
-                        </div>
-                        
-                        <div class="space-y-6 text-sm text-slate-700">
-                            <!-- 現職 -->
-                            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100">
-                                <h4 class="font-bold text-slate-800 flex items-center gap-2 mb-3 border-b border-slate-100 pb-2"><i class="fas fa-briefcase text-brand-500 w-5"></i> 現職 Current</h4>
-                                <ul class="space-y-2">
-                                    <li class="flex items-start gap-2"><i class="fas fa-chevron-right text-brand-400 mt-1 text-[10px]"></i> <span>龍華科大 數位行銷講師</span></li>
-                                    <li class="flex items-start gap-2"><i class="fas fa-chevron-right text-brand-400 mt-1 text-[10px]"></i> <span>智策慧 品牌行銷科技顧問</span></li>
-                                </ul>
-                            </div>
-                            
-                            <!-- 經歷 -->
-                            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100">
-                                <h4 class="font-bold text-slate-800 flex items-center gap-2 mb-3 border-b border-slate-100 pb-2"><i class="fas fa-award text-purple-500 w-5"></i> 經歷 Experience</h4>
-                                <ul class="space-y-2">
-                                    <li class="flex items-start gap-2"><i class="fas fa-chevron-right text-purple-400 mt-1 text-[10px]"></i> <span>脈動心聯股份有限公司 創辦人暨執行長</span></li>
-                                    <li class="flex items-start gap-2"><i class="fas fa-chevron-right text-purple-400 mt-1 text-[10px]"></i> <span>宏碁集團建碁 AOPEN 整合營銷處處長 / 全球品牌行銷總監 / 企業發言人</span></li>
-                                    <li class="flex items-start gap-2"><i class="fas fa-chevron-right text-purple-400 mt-1 text-[10px]"></i> <span>台灣數位看板多媒體聯盟 (DSMA) 副會長</span></li>
-                                </ul>
-                            </div>
+                    <h3 class="text-brand-600"><i class="fab fa-youtube text-red-500"></i> 2. 擷取 YouTube / 線上會議音訊 (殺手級功能)</h3>
+                    <ul>
+                        <li>點擊紅色的「<strong>擷取分頁 / YouTube 音訊</strong>」按鈕。</li>
+                        <li>在彈出的系統視窗中，選擇「<strong>Chrome 分頁</strong>」並點選您要錄音的 YouTube 或會議分頁。</li>
+                        <li><strong class="text-red-600 bg-red-50 px-1 rounded">最重要：務必勾選視窗左下角的「分享分頁音訊」！</strong>否則系統將無法收音並會自動中斷。</li>
+                    </ul>
 
-                            <!-- 專家授課 -->
-                            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100">
-                                <h4 class="font-bold text-slate-800 flex items-center gap-2 mb-3 border-b border-slate-100 pb-2"><i class="fas fa-chalkboard-teacher text-amber-500 w-5"></i> 專家授課經歷</h4>
-                                <ul class="space-y-2">
-                                    <li class="flex items-start gap-2"><i class="fas fa-chevron-right text-amber-400 mt-1 text-[10px]"></i> <span>CPC 生產力中心 經營管理顧問師班 / 中小企業成長創價能量 講師</span></li>
-                                    <li class="flex items-start gap-2"><i class="fas fa-chevron-right text-amber-400 mt-1 text-[10px]"></i> <span>台大 EMBA / 長榮 EMBA / 北科大 / 政大 / 世新 業師</span></li>
-                                    <li class="flex items-start gap-2"><i class="fas fa-chevron-right text-amber-400 mt-1 text-[10px]"></i> <span>2021 MarTech 行銷科技行銷長認證班 講師</span></li>
-                                    <li class="flex items-start gap-2"><i class="fas fa-chevron-right text-amber-400 mt-1 text-[10px]"></i> <span>2021/2024/2025 T大使與產業尖兵 講師</span></li>
-                                    <li class="flex items-start gap-2"><i class="fas fa-chevron-right text-amber-400 mt-1 text-[10px]"></i> <span>2025 新光人壽 AI 工具應用 企業內訓講師</span></li>
-                                </ul>
-                            </div>
+                    <h3 class="text-brand-600"><i class="fas fa-magic"></i> 3. AI 逐字稿與智慧排版</h3>
+                    <p>錄音或上傳音檔完成後，點選「<strong>開始 AI 語音處理</strong>」。系統會自動產出具有<strong>段落與粗體重點</strong>的逐字稿。您可以點擊「<strong>AI 智慧助手</strong>」將其一鍵轉換為條列式摘要或待辦事項。</p>
 
-                            <!-- 學歷 -->
-                            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100">
-                                <h4 class="font-bold text-slate-800 flex items-center gap-2 mb-3 border-b border-slate-100 pb-2"><i class="fas fa-graduation-cap text-emerald-500 w-5"></i> 學歷 Education</h4>
-                                <div class="flex flex-wrap gap-x-6 gap-y-2">
-                                    <div class="flex items-center gap-1.5"><i class="fas fa-circle text-emerald-400 text-[6px]"></i> <span>台大 EMBA 商學組</span></div>
-                                    <div class="flex items-center gap-1.5"><i class="fas fa-circle text-emerald-400 text-[6px]"></i> <span>美國 Arizona State University 互動多媒體設計</span></div>
-                                    <div class="flex items-center gap-1.5"><i class="fas fa-circle text-emerald-400 text-[6px]"></i> <span>北科大 工業設計</span></div>
-                                </div>
-                            </div>
-                        </div>
+                    <h3 class="text-brand-600"><i class="fas fa-file-word text-blue-600"></i> 4. 匯出完美排版的 Word 報告</h3>
+                    <p>每個文字區塊的右上角都有「<strong>儲存 Word</strong>」按鈕。點擊後，系統會將畫面上的粗體、顏色、段落等富文本格式，<strong>100% 完美轉換為 Word 檔案</strong>，省去人工重新排版的時間。</p>
+                    
+                    <h3 class="text-brand-600"><i class="fas fa-volume-up text-emerald-600"></i> 5. 11 國智慧翻譯與母語朗讀</h3>
+                    <p>切換至「智慧文字翻譯」分頁，輸入文字並選擇 11 國語言與語氣，AI 將進行在地化翻譯。點擊「<strong>母語高音質朗讀</strong>」，系統將呼叫最新官方引擎發出流暢的當地母語發音。</p>
+
+                    <h3 class="text-brand-600"><i class="fas fa-cloud text-blue-500"></i> 6. Google 登入與雲端專案庫</h3>
+                    <p>點擊右上角登入 Google 帳號。處理完的專案可點擊「<strong>雲端存檔</strong>」，系統會將您的<strong>原始錄音檔與所有文字</strong>安全儲存至 Firebase 雲端。即使更換電腦，點擊「雲端專案庫」也能一秒恢復所有進度！</p>
+
+                    <h3 class="text-red-600 border-t pt-5 mt-5"><i class="fas fa-exclamation-triangle"></i> 7. 系統限制與防呆機制說明 (必看)</h3>
+                    <div class="bg-red-50 p-5 rounded-xl border border-red-200 text-sm shadow-inner">
+                        <ul class="mb-0 space-y-3 text-slate-700">
+                            <li><strong class="text-red-700">上傳大小嚴格阻擋 (最大 20MB)：</strong>受限於 Google API 傳輸限制，單次上傳的音檔<strong>不可超過 20MB</strong>。若上傳超過此大小，系統會主動亮紅燈阻擋，請您先於本機端將檔案裁切後再上傳。</li>
+                            <li><strong class="text-red-700">錄音 30 分鐘自動安全存檔：</strong>雖然 AI 能聽完極長的錄音，但每次「生成文字」的上限約為 6,000 之中文字。為了防止長度超載導致逐字稿結尾被強制截斷，本系統內建<strong>「30分鐘自動保護機制」</strong>。只要錄音滿 30 分鐘，系統會自動切斷並保存音檔，並跳出黃色提醒視窗。</li>
+                            <li><strong class="text-brand-700"><i class="fas fa-lightbulb text-amber-500 mr-1"></i> TONY 顧問最佳實踐：</strong>遇到長篇會議時，請放心讓系統錄音。當跳出「30 分鐘已保護」的提示視窗時，請先點擊「開始 AI 語音處理」並存檔，將這半小時的紀錄確保無誤後，再按一次錄音鍵繼續下一段。這能 100% 確保您的會議內容不遺失，且 AI 分析精準度最高！</li>
+                        </ul>
                     </div>
                 </div>
             </div>
@@ -490,14 +448,95 @@
         </div>
     </div>
 
+    <!-- 30分鐘上限提醒 Modal -->
+    <div id="modal-record-limit" class="hidden fixed inset-0 z-[99999] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+        <div id="modal-record-limit-content" class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden scale-95 transition-transform duration-300 flex flex-col">
+            <div class="bg-amber-50 px-6 py-4 border-b border-amber-100 flex justify-between items-center shrink-0">
+                <h3 class="font-bold text-amber-800 flex items-center gap-2 text-lg"><i class="fas fa-shield-alt text-amber-500"></i> 系統安全防護啟動</h3>
+            </div>
+            <div class="p-6 bg-white text-center">
+                <div class="w-16 h-16 bg-amber-100 text-amber-500 rounded-full flex items-center justify-center text-3xl mx-auto mb-4"><i class="fas fa-clock"></i></div>
+                <h4 class="text-xl font-bold text-slate-800 mb-2">已達到 30 分鐘錄音上限</h4>
+                <p class="text-slate-600 mb-6 text-sm">為了確保 AI 產出的逐字稿不會因為過長而被截斷，系統已自動將您前 30 分鐘的錄音安全保存。<br><br>請先點擊「開始 AI 處理」完成此段落，再重新開啟錄音繼續下一段。</p>
+                <button id="btn-close-record-limit" class="w-full py-3 bg-brand-500 hover:bg-brand-600 text-white rounded-xl font-bold shadow-md transition-all">我知道了，立即處理</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TONY 顧問簡介 Modal -->
+    <div id="modal-creator" class="hidden fixed inset-0 z-[99999] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+        <div id="modal-creator-content" class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden scale-95 transition-transform duration-300 flex flex-col max-h-[90vh]">
+            <div class="bg-brand-50 px-6 py-4 border-b border-brand-100 flex justify-between items-center shrink-0">
+                <h3 class="font-bold text-brand-800 flex items-center gap-2 text-lg"><i class="fas fa-id-card text-brand-600"></i> 創作者簡介</h3>
+                <button id="btn-close-creator" class="text-slate-400 hover:text-red-500 transition-colors w-8 h-8 flex items-center justify-center rounded-full hover:bg-red-50"><i class="fas fa-times text-lg"></i></button>
+            </div>
+            <div class="p-6 overflow-y-auto flex-1 bg-white custom-scrollbar flex flex-col md:flex-row gap-6">
+                <div class="md:w-1/3 flex flex-col items-center text-center">
+                    <img src="https://i.postimg.cc/Gh8Zt7SX/S_56844323.jpg" alt="TONY 顧問" class="w-40 h-40 object-cover rounded-full border-4 border-brand-100 shadow-lg mb-4">
+                    <h2 class="text-xl font-bold text-slate-800">TONY 楊文澤 老師</h2>
+                    <p class="text-sm text-brand-600 font-bold mb-1">資深數位行銷科技顧問</p>
+                    <p class="text-sm text-slate-500 font-medium">生成式 AI 創作者 / 創業導師</p>
+                </div>
+                <div class="md:w-2/3 prose prose-slate prose-sm max-w-none">
+                    <h4 class="text-brand-700 border-b pb-2 mb-3"><i class="fas fa-briefcase"></i> 現職 Current</h4>
+                    <ul class="mb-5">
+                        <li>龍華科大 數位行銷講師</li>
+                        <li>智策慧 品牌行銷科技顧問</li>
+                    </ul>
+                    <h4 class="text-brand-700 border-b pb-2 mb-3"><i class="fas fa-history"></i> 經歷 Experience</h4>
+                    <ul class="mb-5">
+                        <li>脈動心聯股份有限公司 創辦人暨執行長</li>
+                        <li>宏碁集團建碁 AOPEN 整合營銷處處長 / 全球品牌行銷總監 / 企業發言人</li>
+                        <li>台灣數位看板多媒體聯盟 (DSMA) 副會長</li>
+                    </ul>
+                    <h4 class="text-brand-700 border-b pb-2 mb-3"><i class="fas fa-graduation-cap"></i> 學歷 Education</h4>
+                    <ul class="mb-5">
+                        <li>台大 EMBA 商學組</li>
+                        <li>美國 Arizona State University 互動多媒體設計</li>
+                        <li>北科大 工業設計</li>
+                    </ul>
+                    <h4 class="text-brand-700 border-b pb-2 mb-3"><i class="fas fa-chalkboard-teacher"></i> 專家授課經歷</h4>
+                    <ul>
+                        <li>CPC 生產力中心 經營管理顧問師班 / 中小企業成長創價能量 講師</li>
+                        <li>台大 EMBA / 長榮 EMBA / 北科大 / 政大 / 世新 業師</li>
+                        <li>2021 MarTech 行銷科技行銷長認證班 講師</li>
+                        <li>2021/2024/2025 T大使與產業尖兵 講師</li>
+                        <li>2025 新光人壽 AI 工具應用 企業內訓講師</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- API 金鑰設定 Modal -->
+    <div id="modal-apikey" class="hidden fixed inset-0 z-[99999] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+        <div id="modal-apikey-content" class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden scale-95 transition-transform duration-300 flex flex-col">
+            <div class="bg-slate-50 px-6 py-4 border-b border-slate-100 flex justify-between items-center shrink-0">
+                <h3 class="font-bold text-slate-800 flex items-center gap-2 text-lg"><i class="fas fa-key text-slate-600"></i> Gemini API 金鑰設定</h3>
+                <button id="btn-close-modal" class="text-slate-400 hover:text-red-500 transition-colors w-8 h-8 flex items-center justify-center rounded-full hover:bg-red-50"><i class="fas fa-times text-lg"></i></button>
+            </div>
+            <div class="p-6 bg-white">
+                <p class="text-sm text-slate-600 mb-4">系統需要您的 Gemini API 金鑰才能運作。您的金鑰僅儲存於本機瀏覽器，不會外洩。</p>
+                <div class="mb-6">
+                    <label class="block text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider">您的 API Key</label>
+                    <input type="password" id="input-api-key" placeholder="AIzaSy..." class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all shadow-inner">
+                </div>
+                <div class="flex flex-col gap-3">
+                    <button id="btn-save-key" class="w-full py-3 bg-brand-500 hover:bg-brand-600 text-white rounded-xl font-bold shadow-md transition-all flex items-center justify-center gap-2">儲存並驗證</button>
+                    <a href="https://aistudio.google.com/app/apikey" target="_blank" class="w-full py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl font-bold transition-all flex items-center justify-center gap-2 text-sm"><i class="fas fa-external-link-alt"></i> 免費申請 Google API 金鑰</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- ================= 核心 Scripts ================= -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, addDoc, setDoc, updateDoc, deleteDoc, collection, getDocs, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, addDoc, deleteDoc, collection, getDocs, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
 
-        // 直接寫入 TONY 老師的正式機專屬 Firebase 金鑰
+        // 寫死 TONY 老師的正式機專屬 Firebase 金鑰
         const firebaseConfig = {
             apiKey: "AIzaSyB7KwhWyC3Gt8LeOLBgaxcrmYwr8BAHwmg",
             authDomain: "k18-tony-firebase.firebaseapp.com",
@@ -507,7 +546,6 @@
             appId: "1:466595322499:web:e8da6daa00eed8223819b6",
             measurementId: "G-NBJPYNTV4X"
         };
-        const appId = firebaseConfig.appId;
         
         try {
             const app = initializeApp(firebaseConfig);
@@ -516,7 +554,7 @@
             const storage = getStorage(app);
 
             window.cloudDb = db;
-            window.cloudAppId = appId;
+            window.cloudAppId = firebaseConfig.appId;
             window.cloudStorage = storage;
             window.fsDoc = doc;
             window.fsGetDoc = getDoc;
@@ -534,24 +572,23 @@
                 const provider = new GoogleAuthProvider();
                 try {
                     await signInWithPopup(auth, provider);
-                    showToast('Google 帳號登入成功！', 'success');
+                    if(window.showToast) window.showToast('Google 帳號登入成功！', 'success');
                 } catch (error) {
-                    showToast('登入失敗: ' + error.message, 'error');
+                    if(window.showToast) window.showToast('登入失敗: ' + error.message, 'error');
                 }
             };
             
             window.logoutGoogle = async () => {
                 try {
                     await signOut(auth);
-                    showToast('已安全登出', 'success');
-                    // Reload to clear sensitive UI states safely
+                    if(window.showToast) window.showToast('已安全登出', 'success');
                     setTimeout(() => window.location.reload(), 1000); 
                 } catch (error) {
-                    showToast('登出失敗', 'error');
+                    if(window.showToast) window.showToast('登出失敗', 'error');
                 }
             };
 
-            // 【修正重點】：刪除導致衝突的沙盒 Token (initAuth)，改為純淨的正式機監聽模式
+            // 純淨正式機監聽模式
             onAuthStateChanged(auth, (user) => {
                 window.currentUser = user;
                 window.firebaseReady = true;
@@ -562,7 +599,7 @@
     </script>
 
     <script>
-        // 【AI 模型集中控制中心】 (支援 10 月之後的新架構)
+        // 【AI 模型集中控制中心】 
         const MODELS = {
             TEXT_AND_TRANSLATE: "gemini-3.7-flash",    
             STT_TRANSCRIBE: "gemini-3.5-transcribe",   
@@ -594,7 +631,6 @@
             const avatar = document.getElementById('user-avatar');
             const userName = document.getElementById('user-name');
             
-            // 如果是登入真實 Google 帳號 (不是匿名)
             if (user && !user.isAnonymous) {
                 if(btnLogin) btnLogin.classList.add('hidden');
                 if(profileUi) { profileUi.classList.remove('hidden'); profileUi.classList.add('flex'); }
@@ -606,7 +642,7 @@
             }
         };
 
-        function showToast(message, type = 'info') {
+        window.showToast = function(message, type = 'info') {
             const container = document.getElementById('toast-container'); 
             if(!container) return;
             const toast = document.createElement('div');
@@ -636,22 +672,10 @@
             }
         }
 
-        function toggleApiKeyModal() {
-            const m = document.getElementById('modal-apikey'); 
-            const c = document.getElementById('modal-apikey-content');
-            if (m.classList.contains('hidden')) { 
-                document.getElementById('input-api-key').value = currentApiKey; 
-                m.classList.remove('hidden'); 
-                setTimeout(() => { m.classList.remove('opacity-0'); c.classList.remove('scale-95'); }, 10); 
-            } else { 
-                m.classList.add('opacity-0'); c.classList.add('scale-95'); 
-                setTimeout(() => m.classList.add('hidden'), 300); 
-            }
-        }
-        
-        function toggleCreatorModal() {
-            const m = document.getElementById('modal-creator'); 
-            const c = document.getElementById('modal-creator-content');
+        function toggleModal(modalId, contentId) {
+            const m = document.getElementById(modalId); 
+            const c = document.getElementById(contentId);
+            if (!m || !c) return;
             if (m.classList.contains('hidden')) { 
                 m.classList.remove('hidden'); 
                 setTimeout(() => { m.classList.remove('opacity-0'); c.classList.remove('scale-95'); }, 10); 
@@ -672,22 +696,26 @@
         function setupSafeEventListeners() {
             // Google Login
             document.getElementById('btn-google-login')?.addEventListener('click', () => { 
-                if (window.loginWithGoogle) {
-                    window.loginWithGoogle(); 
-                } else {
-                    showToast('系統錯誤：找不到 Firebase 伺服器設定！請先在程式碼填寫 firebaseConfig', 'error');
-                }
+                if (window.loginWithGoogle) window.loginWithGoogle(); 
+                else window.showToast('系統初始化中，請稍候再試', 'warning');
             });
             document.getElementById('btn-logout')?.addEventListener('click', () => { if(window.logoutGoogle) window.logoutGoogle(); });
 
             // Tabs & Modals
             document.getElementById('tab-btn-stt')?.addEventListener('click', () => switchTab('stt'));
             document.getElementById('tab-btn-translate')?.addEventListener('click', () => switchTab('translate'));
-            document.getElementById('btn-api-settings')?.addEventListener('click', toggleApiKeyModal);
-            document.getElementById('btn-close-modal')?.addEventListener('click', toggleApiKeyModal);
+            
+            document.getElementById('btn-api-settings')?.addEventListener('click', () => { document.getElementById('input-api-key').value = currentApiKey; toggleModal('modal-apikey', 'modal-apikey-content'); });
+            document.getElementById('btn-close-modal')?.addEventListener('click', () => toggleModal('modal-apikey', 'modal-apikey-content'));
             document.getElementById('btn-save-key')?.addEventListener('click', saveApiKey);
-            document.getElementById('btn-creator-info')?.addEventListener('click', toggleCreatorModal);
-            document.getElementById('btn-close-creator')?.addEventListener('click', toggleCreatorModal);
+            
+            document.getElementById('btn-creator-info')?.addEventListener('click', () => toggleModal('modal-creator', 'modal-creator-content'));
+            document.getElementById('btn-close-creator')?.addEventListener('click', () => toggleModal('modal-creator', 'modal-creator-content'));
+            
+            document.getElementById('btn-user-guide')?.addEventListener('click', () => toggleModal('modal-guide', 'modal-guide-content'));
+            document.getElementById('btn-close-guide')?.addEventListener('click', () => toggleModal('modal-guide', 'modal-guide-content'));
+
+            document.getElementById('btn-close-record-limit')?.addEventListener('click', () => toggleModal('modal-record-limit', 'modal-record-limit-content'));
             
             // Audio Core
             document.getElementById('btn-record')?.addEventListener('click', startRecording);
@@ -718,10 +746,13 @@
             document.getElementById('btn-copy-text-out')?.addEventListener('click', () => copyToClipboard('text-output'));
             document.getElementById('btn-word-text-out')?.addEventListener('click', () => exportToWord('text-output', '智慧文字翻譯結果'));
             
+            document.getElementById('btn-word-guide')?.addEventListener('click', () => exportToWord('guide-content', 'TONY_STUDIO_系統操作手冊'));
+
             // Project Save/Load (Local & Cloud)
             document.getElementById('btn-save-project')?.addEventListener('click', saveProjectData);
             document.getElementById('load-project-input')?.addEventListener('change', loadProjectData);
             document.getElementById('btn-load-project')?.addEventListener('click', () => document.getElementById('load-project-input')?.click());
+            
             document.getElementById('btn-cloud-save')?.addEventListener('click', saveCloudProject);
             document.getElementById('btn-cloud-load')?.addEventListener('click', openCloudModal);
             document.getElementById('btn-close-cloud-modal')?.addEventListener('click', closeCloudModal);
@@ -757,28 +788,27 @@
         }
 
         // ==========================================
-        // 核心邏輯區 (API 驗證、專案存取、音訊上傳、AI 處理)
+        // 核心邏輯區 (API 驗證、專案存取、音訊上傳)
         // ==========================================
         async function saveApiKey() {
             const key = document.getElementById('input-api-key').value.trim(); 
-            if (!key) return showToast('請輸入金鑰', 'error');
+            if (!key) return window.showToast('請輸入金鑰', 'error');
             const btn = document.getElementById('btn-save-key'); 
             const orig = btn.innerHTML; 
             btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>連線驗證中...'; btn.disabled = true;
             try {
-                // 統一使用 TEXT_AND_TRANSLATE 測試權限
                 const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODELS.TEXT_AND_TRANSLATE}:generateContent?key=${key}`, { 
                     method: 'POST', headers: { 'Content-Type': 'application/json' }, 
                     body: JSON.stringify({ contents: [{ parts: [{ text: "Hi" }] }] }) 
                 });
                 if (res.ok) { 
                     currentApiKey = key; localStorage.setItem('gemini_api_key', key); 
-                    updateApiKeyUI(); showToast('API 金鑰驗證與儲存成功', 'success'); toggleApiKeyModal(); 
+                    updateApiKeyUI(); window.showToast('API 金鑰驗證與儲存成功', 'success'); toggleModal('modal-apikey', 'modal-apikey-content'); 
                 } else {
                     const err = await res.json();
-                    showToast(`無效的金鑰: ${err.error?.message || '驗證失敗'}`, 'error');
+                    window.showToast(`無效的金鑰: ${err.error?.message || '驗證失敗'}`, 'error');
                 }
-            } catch (e) { showToast('網路連線錯誤，請檢查網路', 'error'); } 
+            } catch (e) { window.showToast('網路連線錯誤，請檢查網路', 'error'); } 
             finally { btn.innerHTML = orig; btn.disabled = false; }
         }
 
@@ -820,8 +850,8 @@
                 const a = document.createElement('a');
                 a.href = URL.createObjectURL(blob); a.download = `TONY_STUDIO_Project_${new Date().toISOString().slice(0,10)}.json`;
                 a.click(); URL.revokeObjectURL(a.href);
-                showToast('專案已完美備份至本機 (含音檔)', 'success');
-            } catch (e) { showToast('本機存檔失敗', 'error'); }
+                window.showToast('專案已完美備份至本機 (含音檔)', 'success');
+            } catch (e) { window.showToast('本機存檔失敗', 'error'); }
         }
 
         function loadProjectData(event) {
@@ -845,8 +875,8 @@
                         fi.innerHTML = `<i class="fas fa-file-audio mr-1"></i> 已還原本機音檔: ${audioBlob.name}`;
                         fi.classList.remove('hidden');
                     }
-                    showToast('✅ 本機專案載入成功！', 'success');
-                } catch (err) { showToast('專案檔格式錯誤', 'error'); }
+                    window.showToast('✅ 本機專案載入成功！', 'success');
+                } catch (err) { window.showToast('專案檔格式錯誤', 'error'); }
                 event.target.value = '';
             };
             reader.readAsText(file);
@@ -854,15 +884,14 @@
 
         // Firebase 雲端存檔 (含 Storage 音檔上傳)
         async function saveCloudProject() {
-            if (!window.firebaseReady || !window.currentUser) return showToast('雲端伺服器連線中，或請先登入帳號', 'warning');
+            if (!window.firebaseReady || !window.currentUser) return window.showToast('雲端伺服器連線中，或請先登入帳號', 'warning');
             const btn = document.getElementById('btn-cloud-save');
             const orig = btn.innerHTML; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 上傳中...'; btn.disabled = true;
             
             try {
                 let downloadUrl = null;
-                // 如果有實體音檔，先上傳至 Firebase Storage
                 if (audioBlob && window.cloudStorage) {
-                    showToast('正在上傳音檔至雲端儲存桶...', 'info');
+                    window.showToast('正在上傳音檔至雲端儲存桶...', 'info');
                     const fileName = audioBlob.name || `audio_${Date.now()}.webm`;
                     const storageRef = window.fsRef(window.cloudStorage, `artifacts/${window.cloudAppId}/users/${window.currentUser.uid}/audio/${fileName}`);
                     await window.fsUploadBytes(storageRef, audioBlob);
@@ -878,28 +907,23 @@
                 
                 const colRef = window.fsCollection(window.cloudDb, 'artifacts', window.cloudAppId, 'users', window.currentUser.uid, 'projects');
                 await window.fsAddDoc(colRef, projectData);
-                showToast('專案與音檔已成功備份至雲端 ☁️', 'success');
+                window.showToast('專案與音檔已成功備份至雲端 ☁️', 'success');
             } catch (error) { 
-                showToast(`雲端存檔失敗: ${error.message}`, 'error'); 
+                window.showToast(`雲端存檔失敗: ${error.message}`, 'error'); 
             } finally { 
                 btn.innerHTML = orig; btn.disabled = false; 
             }
         }
 
         // 雲端專案庫 UI 與載入邏輯
-        function closeCloudModal() {
-            const m = document.getElementById('modal-cloud'); const c = document.getElementById('modal-cloud-content');
-            m.classList.add('opacity-0'); c.classList.add('scale-95'); setTimeout(() => m.classList.add('hidden'), 300);
-        }
+        function closeCloudModal() { toggleModal('modal-cloud', 'modal-cloud-content'); }
 
         async function openCloudModal() {
-            if (!window.firebaseReady || !window.currentUser) return showToast('雲端伺服器連線中，或請先登入', 'warning');
-            const m = document.getElementById('modal-cloud'); const c = document.getElementById('modal-cloud-content');
-            const listEl = document.getElementById('cloud-projects-list');
+            if (!window.firebaseReady || !window.currentUser) return window.showToast('請先登入 Google 帳號解鎖雲端功能', 'warning');
             
-            m.classList.remove('hidden'); 
+            const listEl = document.getElementById('cloud-projects-list');
+            toggleModal('modal-cloud', 'modal-cloud-content');
             listEl.innerHTML = '<div class="text-center py-12"><i class="fas fa-circle-notch fa-spin text-blue-500 text-4xl"></i><p class="mt-4 text-slate-500 font-bold tracking-wide">載入雲端紀錄中...</p></div>';
-            setTimeout(() => { m.classList.remove('opacity-0'); c.classList.remove('scale-95'); }, 10); 
             
             try {
                 const colRef = window.fsCollection(window.cloudDb, 'artifacts', window.cloudAppId, 'users', window.currentUser.uid, 'projects');
@@ -931,14 +955,13 @@
         window.loadCloudProject = async function(docId) {
             if (!window.currentUser) return;
             try {
-                showToast('正在下載雲端資料...', 'info');
+                window.showToast('正在下載雲端資料...', 'info');
                 const docRef = window.fsDoc(window.cloudDb, 'artifacts', window.cloudAppId, 'users', window.currentUser.uid, 'projects', docId);
                 const snap = await window.fsGetDoc(docRef);
                 if (snap.exists()) {
                     const data = snap.data();
                     restoreProjectSnapshot(data);
                     
-                    // 如果雲端有綁定實體音檔，抓取下來變成 Blob
                     if (data.audioUrl) {
                         try {
                             const response = await fetch(data.audioUrl);
@@ -954,7 +977,7 @@
                                 fi.classList.remove('hidden');
                             }
                         } catch (err) {
-                            showToast('已載入文字進度。音檔跨域限制僅供播放，無法再次AI處理', 'warning');
+                            window.showToast('已載入文字進度。音檔跨域限制僅供播放，無法再次AI處理', 'warning');
                             document.getElementById('audio-playback').src = data.audioUrl;
                             document.getElementById('audio-playback-container').classList.remove('hidden');
                             document.getElementById('btn-process-audio').disabled = true;
@@ -967,9 +990,9 @@
                          document.getElementById('selected-file-info').classList.add('hidden');
                     }
                     
-                    closeCloudModal(); showToast('✅ 雲端專案載入成功！', 'success');
+                    closeCloudModal(); window.showToast('✅ 雲端專案載入成功！', 'success');
                 }
-            } catch(e) { showToast(`載入失敗: ${e.message}`, 'error'); }
+            } catch(e) { window.showToast(`載入失敗: ${e.message}`, 'error'); }
         };
 
         window.deleteCloudProject = async function(docId) {
@@ -978,8 +1001,8 @@
             try {
                 const docRef = window.fsDoc(window.cloudDb, 'artifacts', window.cloudAppId, 'users', window.currentUser.uid, 'projects', docId);
                 await window.fsDeleteDoc(docRef);
-                showToast('🗑️ 專案已刪除', 'success'); openCloudModal();
-            } catch(e) { showToast(`刪除失敗: ${e.message}`, 'error'); }
+                window.showToast('🗑️ 專案已刪除', 'success'); openCloudModal();
+            } catch(e) { window.showToast(`刪除失敗: ${e.message}`, 'error'); }
         };
 
         // ==========================================
@@ -988,18 +1011,17 @@
         function copyToClipboard(id) {
             const el = document.getElementById(id); if(!el) return;
             const t = el.tagName === 'TEXTAREA' || el.tagName === 'INPUT' ? el.value : el.innerText;
-            if(!t || t.trim() === '') return showToast('無內容可複製', 'warning');
+            if(!t || t.trim() === '') return window.showToast('無內容可複製', 'warning');
             const ta = document.createElement("textarea"); ta.value = t; document.body.appendChild(ta); ta.select();
-            try { document.execCommand('copy'); showToast('已成功複製到剪貼簿', 'success'); } 
-            catch (e) { showToast('複製失敗', 'error'); } finally { document.body.removeChild(ta); }
+            try { document.execCommand('copy'); window.showToast('已成功複製到剪貼簿', 'success'); } 
+            catch (e) { window.showToast('複製失敗', 'error'); } finally { document.body.removeChild(ta); }
         }
 
         function exportToWord(elementId, filenamePrefix) {
             const el = document.getElementById(elementId); if (!el) return;
             let contentHtml = el.tagName === 'TEXTAREA' ? el.value.trim().split('\n').map(p => `<p>${p}</p>`).join('') : el.innerHTML.trim();
-            if(!contentHtml || contentHtml === '') return showToast('無內容可匯出', 'warning');
+            if(!contentHtml || contentHtml === '') return window.showToast('無內容可匯出', 'warning');
 
-            // 注入漂亮的 Word 專屬排版樣式
             const html = `
             <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
             <head><meta charset='utf-8'><title>${filenamePrefix}</title>
@@ -1018,12 +1040,12 @@
             const b = new Blob(['\ufeff', html], { type: 'application/msword' }); 
             const l = document.createElement('a'); l.href = URL.createObjectURL(b); 
             l.download = `${filenamePrefix}_${new Date().toISOString().slice(0,10).replace(/-/g, "")}.doc`; 
-            l.click(); showToast('已完美匯出為 Word 檔案', 'success');
+            l.click(); window.showToast('已完美匯出為 Word 檔案', 'success');
         }
 
         function exportToSRT() {
             const t = document.getElementById('stt-source-text').innerText; 
-            if (!t || t.includes('【錯誤】')) return showToast('無有效的 SRT 內容', 'warning');
+            if (!t || t.includes('【錯誤】')) return window.showToast('無有效的 SRT 內容', 'warning');
             const b = new Blob(['\ufeff', t], { type: 'text/plain' }); 
             const l = document.createElement('a'); l.href = URL.createObjectURL(b); l.download = `Subtitle_${Date.now()}.srt`; l.click();
         }
@@ -1034,6 +1056,11 @@
         async function handleFileUpload(e) { if (e.target.files.length > 0) processSelectedFile(e.target.files[0]); }
         
         async function processSelectedFile(file) {
+            // 防呆阻擋機制：超過 20MB 嚴格擋下
+            if (file.size > 20 * 1024 * 1024) {
+                window.showToast('檔案大小超過 20MB 上限，請先裁切後再上傳！', 'error');
+                return;
+            }
             try {
                 audioBlob = file; await prepareAudioForGemini();
                 document.getElementById('audio-playback').src = URL.createObjectURL(audioBlob); 
@@ -1047,8 +1074,8 @@
                 if(icon) { icon.className = "fas fa-check-circle text-emerald-500"; }
                 
                 document.getElementById('btn-process-audio').disabled = false;
-                showToast('音檔載入就緒，可開始 AI 處理', 'success');
-            } catch (err) { showToast('音檔讀取失敗', 'error'); }
+                window.showToast('音檔載入就緒，可開始 AI 處理', 'success');
+            } catch (err) { window.showToast('音檔讀取失敗', 'error'); }
         }
 
         async function prepareAudioForGemini() { 
@@ -1058,22 +1085,57 @@
             }); 
         }
 
+        async function startRecording() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                let mt = 'audio/webm'; if(!MediaRecorder.isTypeSupported(mt)) mt = 'audio/mp4'; if(!MediaRecorder.isTypeSupported(mt)) mt = '';
+                
+                mediaRecorder = mt ? new MediaRecorder(stream, { mimeType: mt }) : new MediaRecorder(stream); 
+                audioChunks = [];
+                mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
+                mediaRecorder.onstop = async () => {
+                    audioBlob = new Blob(audioChunks, { type: mt || 'audio/wav' }); 
+                    audioBlob.name = `一般麥克風錄音_${Date.now()}.webm`; 
+                    await prepareAudioForGemini();
+                    document.getElementById('audio-playback').src = URL.createObjectURL(audioBlob); 
+                    document.getElementById('audio-playback-container').classList.remove('hidden');
+                    document.getElementById('btn-process-audio').disabled = false;
+                    stream.getTracks().forEach(t => t.stop());
+                };
+                
+                mediaRecorder.start(100); isRecording = true; recordSeconds = 0;
+                document.getElementById('btn-record-container').classList.add('hidden'); 
+                document.getElementById('recording-indicator').classList.remove('hidden');
+                document.getElementById('recording-indicator').classList.add('flex');
+                
+                recordTimerInterval = setInterval(() => { 
+                    recordSeconds++; 
+                    document.getElementById('record-time').textContent = `${Math.floor(recordSeconds/60).toString().padStart(2,'0')}:${(recordSeconds%60).toString().padStart(2,'0')}`; 
+                    
+                    // 30分鐘 (1800秒) 自動停止防護
+                    if (recordSeconds >= 1800) {
+                        stopRecording();
+                        toggleModal('modal-record-limit', 'modal-record-limit-content');
+                    }
+                }, 1000);
+            } catch (err) { 
+                window.showToast(`無法存取麥克風: 請確認系統權限設定`, 'error'); 
+            }
+        }
+
         async function startSystemRecording() {
             try {
-                // 要求使用者選擇分頁並「強制分享音訊」
                 const stream = await navigator.mediaDevices.getDisplayMedia({ 
                     video: { displaySurface: "browser" }, 
                     audio: true 
                 });
                 
-                // 檢查使用者是否有勾選「分享音訊」
                 if (stream.getAudioTracks().length === 0) {
-                    showToast('操作錯誤：請務必在分享畫面時勾選「分享分頁音訊」！', 'error');
+                    window.showToast('操作錯誤：請務必在分享畫面時勾選「分享分頁音訊」！', 'error');
                     stream.getTracks().forEach(t => t.stop());
                     return;
                 }
 
-                // 只提取音訊軌道，拋棄影像軌道，節省記憶體
                 const audioStream = new MediaStream([stream.getAudioTracks()[0]]);
                 let mt = 'audio/webm'; if(!MediaRecorder.isTypeSupported(mt)) mt = 'audio/mp4'; if(!MediaRecorder.isTypeSupported(mt)) mt = '';
                 
@@ -1087,7 +1149,6 @@
                     document.getElementById('audio-playback').src = URL.createObjectURL(audioBlob); 
                     document.getElementById('audio-playback-container').classList.remove('hidden');
                     document.getElementById('btn-process-audio').disabled = false;
-                    // 錄音結束後，自動停止瀏覽器的畫面分享標籤
                     stream.getTracks().forEach(t => t.stop());
                 };
                 
@@ -1099,47 +1160,15 @@
                 recordTimerInterval = setInterval(() => { 
                     recordSeconds++; 
                     document.getElementById('record-time').textContent = `${Math.floor(recordSeconds/60).toString().padStart(2,'0')}:${(recordSeconds%60).toString().padStart(2,'0')}`; 
-                }, 1000);
-
-                // 如果使用者從瀏覽器原生的「停止共用」按鈕關閉，也能正常存檔
-                stream.getVideoTracks()[0].onended = () => { if (isRecording) stopRecording(); };
-
-            } catch (err) { 
-                showToast(`擷取取消或授權失敗，請確認是否允許分享畫面`, 'warning'); 
-            }
-        }
-
-        async function startRecording() {
-            try {
-                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                    showToast('環境阻擋：請使用原生瀏覽器 (非 Line 內建) 或確認 HTTPS', 'error'); return;
-                }
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                let mt = 'audio/webm'; if(!MediaRecorder.isTypeSupported(mt)) mt = 'audio/mp4'; if(!MediaRecorder.isTypeSupported(mt)) mt = '';
-                
-                mediaRecorder = mt ? new MediaRecorder(stream, { mimeType: mt }) : new MediaRecorder(stream); 
-                audioChunks = [];
-                mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
-                mediaRecorder.onstop = async () => {
-                    audioBlob = new Blob(audioChunks, { type: mt || 'audio/wav' }); 
-                    audioBlob.name = `錄音檔_${Date.now()}.webm`; // 給個假檔名方便雲端儲存
-                    await prepareAudioForGemini();
-                    document.getElementById('audio-playback').src = URL.createObjectURL(audioBlob); 
-                    document.getElementById('audio-playback-container').classList.remove('hidden');
-                    document.getElementById('btn-process-audio').disabled = false;
-                };
-                
-                mediaRecorder.start(100); isRecording = true; recordSeconds = 0;
-                document.getElementById('btn-record-container').classList.add('hidden'); 
-                document.getElementById('recording-indicator').classList.remove('hidden');
-                document.getElementById('recording-indicator').classList.add('flex');
-                
-                recordTimerInterval = setInterval(() => { 
-                    recordSeconds++; 
-                    document.getElementById('record-time').textContent = `${Math.floor(recordSeconds/60).toString().padStart(2,'0')}:${(recordSeconds%60).toString().padStart(2,'0')}`; 
+                    
+                    // 30分鐘 (1800秒) 自動停止防護
+                    if (recordSeconds >= 1800) {
+                        stopRecording();
+                        toggleModal('modal-record-limit', 'modal-record-limit-content');
+                    }
                 }, 1000);
             } catch (err) { 
-                showToast(`無法存取麥克風: 請確認系統權限`, 'error'); 
+                window.showToast(`無法存取系統音訊，請確認已授權分享`, 'error'); 
             }
         }
 
@@ -1154,7 +1183,7 @@
         }
 
         // ==========================================
-        // Gemini AI 處理邏輯 (全面導入 Markdown 與富文本)
+        // Gemini AI 處理邏輯 (Markdown 與富文本)
         // ==========================================
         function setUILoading(isLoading, type) {
             const el = document.getElementById(type);
@@ -1169,8 +1198,8 @@
         }
 
         async function processAudioWithGemini() {
-            if (!currentApiKey) return showToast('請先至右上角設定 API 金鑰', 'error'); 
-            if (!audioBase64) return showToast('請先上傳音檔', 'warning');
+            if (!currentApiKey) return window.showToast('請先至右上角設定 API 金鑰', 'error'); 
+            if (!audioBase64) return window.showToast('請先上傳音檔', 'warning');
             
             const btn = document.getElementById('btn-process-audio'); 
             const btnLabel = document.getElementById('btn-process-audio-text');
@@ -1202,15 +1231,13 @@
                 
                 let srcTxt = "";
                 try {
-                    // STT 主力引擎 (3.5)
                     const r35 = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODELS.STT_TRANSCRIBE}:generateContent?key=${currentApiKey}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
                     const res35 = await r35.json(); 
                     if (!r35.ok) throw new Error(res35.error?.message || 'STT failed');
                     srcTxt = res35?.candidates?.[0]?.content?.parts?.[0]?.text;
                     if (!srcTxt || srcTxt.trim() === "") throw new Error("empty response");
                 } catch (e) {
-                    showToast(`啟動 ${MODELS.TEXT_AND_TRANSLATE} 備援機制`, 'warning'); 
-                    // STT 備援引擎 (3.7)
+                    window.showToast(`啟動 ${MODELS.TEXT_AND_TRANSLATE} 備援機制`, 'warning'); 
                     const r37 = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODELS.TEXT_AND_TRANSLATE}:generateContent?key=${currentApiKey}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
                     const res37 = await r37.json(); 
                     if (!r37.ok) throw new Error(`備援錯誤: ${res37.error?.message}`);
@@ -1218,7 +1245,6 @@
                 }
 
                 setUILoading(false, 'stt-source-loading');
-                // 使用 Marked.js 渲染 Markdown 到 contenteditable 區塊
                 document.getElementById('stt-source-text').innerHTML = isSrt ? `<pre class="whitespace-pre-wrap">${srcTxt.trim()}</pre>` : marked.parse(srcTxt.trim());
                 
                 if (isAuto && !srcTxt.includes("【未能辨識")) {
@@ -1235,21 +1261,21 @@
                 if (isSrt) { document.getElementById('btn-export-srt').classList.remove('hidden'); document.getElementById('label-srt-active').classList.replace('hidden', 'inline-block'); }
                 else { document.getElementById('btn-export-srt').classList.add('hidden'); document.getElementById('label-srt-active').classList.replace('inline-block', 'hidden'); }
                 
-                showToast('AI 處理完畢！', 'success'); 
+                window.showToast('AI 處理完畢！', 'success'); 
             } catch (err) {
                 setUILoading(false, 'stt-source-loading');
                 if(isAuto) setUILoading(false, 'stt-trans-loading');
                 document.getElementById('stt-source-text').innerHTML = `<p class="text-red-500 font-bold">【處理錯誤】</p><p>${err.message}</p>`; 
-                showToast(`處理失敗: ${err.message}`, 'error');
+                window.showToast(`處理失敗: ${err.message}`, 'error');
             } finally { 
                 btnLabel.innerHTML = '開始 AI 語音處理'; btn.disabled = false; 
             }
         }
 
         async function runAIAssistant(type) {
-            if(!currentApiKey) return showToast('請先設定 API 金鑰', 'error');
+            if(!currentApiKey) return window.showToast('請先設定 API 金鑰', 'error');
             const txt = document.getElementById('stt-source-text').innerText.trim(); 
-            if(!txt || txt.includes('【錯誤】')) return showToast('無有效的逐字稿內容', 'warning');
+            if(!txt || txt.includes('【錯誤】')) return window.showToast('無有效的逐字稿內容', 'warning');
             
             const l = document.getElementById('ai-assistant-loading'); 
             const o = document.getElementById('ai-assistant-output'); 
@@ -1279,17 +1305,17 @@
                 if(!r.ok) throw new Error(j.error?.message);
                 const mdText = j?.candidates?.[0]?.content?.parts?.[0]?.text || '生成失敗。'; 
                 o.innerHTML = marked.parse(mdText);
-                showToast('AI 分析排版完成', 'success');
+                window.showToast('AI 分析排版完成', 'success');
             } catch(e) { 
                 o.innerHTML = `<p class="text-red-400 font-bold">生成錯誤: ${e.message}</p>`; 
-                showToast('生成失敗', 'error');
+                window.showToast('生成失敗', 'error');
             } finally { l.classList.replace('flex', 'hidden'); }
         }
 
         async function processTextTranslation() {
-            if (!currentApiKey) return showToast('需設定 API Key', 'error');
+            if (!currentApiKey) return window.showToast('需設定 API Key', 'error');
             const txt = document.getElementById('text-input').value.trim(); 
-            if (!txt) return showToast('請先在上方輸入要翻譯的文字', 'info');
+            if (!txt) return window.showToast('請先在上方輸入要翻譯的文字', 'info');
             
             const btn = document.getElementById('btn-translate-text');
             const btnLabel = document.getElementById('btn-translate-text-label');
@@ -1307,9 +1333,9 @@
                 if (!res.ok) throw new Error(data.error?.message);
                 const outTxt = data?.candidates?.[0]?.content?.parts?.[0]?.text || "翻譯失敗";
                 document.getElementById('text-output').innerHTML = marked.parse(outTxt.trim());
-                showToast('AI 翻譯排版完成', 'success');
+                window.showToast('AI 翻譯排版完成', 'success');
             } catch (e) { 
-                showToast(`翻譯失敗: ${e.message}`, 'error'); 
+                window.showToast(`翻譯失敗: ${e.message}`, 'error'); 
             } finally { 
                 btn.disabled = false; btnLabel.innerHTML = '開始智慧翻譯';
                 document.getElementById('translation-loading').classList.replace('flex', 'hidden'); 
@@ -1317,7 +1343,7 @@
         }
 
         // ==========================================
-        // Gemini TTS 官方發音引擎 (支援 11 國發音無阻擋)
+        // Gemini TTS 官方發音引擎 (自動解碼 Float32)
         // ==========================================
         function base64ToArrayBuffer(base64) {
             const bin = window.atob(base64); const bytes = new Uint8Array(bin.length);
@@ -1325,23 +1351,21 @@
         }
 
         async function playTranslatedAudio() {
-            if (!currentApiKey) return showToast('請先設定 API Key', 'error');
+            if (!currentApiKey) return window.showToast('請先設定 API Key', 'error');
             const text = document.getElementById('text-output').innerText.trim();
-            if (!text) return showToast('請先進行翻譯，沒有可以朗讀的文字', 'warning');
+            if (!text) return window.showToast('請先進行翻譯，沒有可以朗讀的文字', 'warning');
             
             const btn = document.getElementById('btn-play-audio'); 
             const btnLabel = document.getElementById('btn-play-audio-label');
             btn.disabled = true; btnLabel.innerHTML = '連線準備中...';
 
             try {
-                // 自動斷句以符合 API 長度限制
                 const chunks = text.match(/[^。！？.!?\n]+[。！？.!?\n]+/g) || [text];
                 btnLabel.innerHTML = '<span class="animate-pulse">雲端串流朗讀中...</span>';
                 
                 for (let chunk of chunks) {
                     if (!chunk.trim()) continue;
                     
-                    // 強制轉向發音指令 (解決大語言模型邏輯衝突)
                     const ttsPrompt = `TTS the following text:\n${chunk}`;
                     const payload = {
                         contents: [{ parts: [{ text: ttsPrompt }] }],
@@ -1364,24 +1388,20 @@
                     const part = result?.candidates?.[0]?.content?.parts?.[0];
                     if (!part?.inlineData?.data) throw new Error('模型未回傳音訊檔案');
 
-                    // 1. 解析 Google 回傳的原始數據與取樣率
                     const audioBase64 = part.inlineData.data;
                     const mimeType = part.inlineData.mimeType || "audio/pcm;rate=24000";
                     const rateMatch = mimeType.match(/rate=(\d+)/);
                     const sampleRate = rateMatch ? parseInt(rateMatch[1], 10) : 24000;
 
-                    // 2. 將 Base64 轉為 16-bit PCM 原始波形矩陣
+                    // 手動轉換 PCM 矩陣至瀏覽器 Float32 緩衝區
                     const pcmData = base64ToArrayBuffer(audioBase64);
                     const pcm16 = new Int16Array(pcmData); 
                     
-                    // 3. 建立瀏覽器音訊上下文
                     const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                    
-                    // 4. 手動建立 AudioBuffer 並將 PCM 轉換為 Float32 (喇叭可播放的格式)
                     const audioBuffer = audioContext.createBuffer(1, pcm16.length, sampleRate);
                     const channelData = audioBuffer.getChannelData(0);
                     for (let i = 0; i < pcm16.length; i++) {
-                        channelData[i] = pcm16[i] / 32768.0; // 將 16-bit 整數正規化為 -1.0 到 1.0 的浮點數
+                        channelData[i] = pcm16[i] / 32768.0; 
                     }
                     
                     const source = audioContext.createBufferSource();
@@ -1394,7 +1414,7 @@
                     });
                 }
             } catch (e) { 
-                showToast(`語音播放失敗: ${e.message}`, 'error'); 
+                window.showToast(`語音播放失敗: ${e.message}`, 'error'); 
             } finally { 
                 btn.disabled = false; btnLabel.innerHTML = '母語高音質朗讀'; 
             }
