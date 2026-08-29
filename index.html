@@ -972,14 +972,17 @@
                 const docRef = window.fsDoc(window.cloudDb, 'artifacts', window.cloudAppId, 'users', window.currentUser.uid, 'projects', docId);
                 const snap = await window.fsGetDoc(docRef);
                 if (snap.exists()) {
+                    resetWorkspace(); // 載入前先清除舊資料
                     const data = snap.data();
                     restoreProjectSnapshot(data);
+                    currentCloudProjectId = docId; // 記住當前載入的專案 ID
                     
                     if (data.audioUrl) {
                         try {
                             const response = await fetch(data.audioUrl);
                             if (response.ok) {
                                 audioBlob = await response.blob();
+                                audioBlob.isCloudUrl = true; // 標記為雲端下載的音檔，避免覆蓋時重複上傳
                                 await prepareAudioForGemini();
                                 document.getElementById('audio-playback').src = URL.createObjectURL(audioBlob);
                                 document.getElementById('audio-playback-container').classList.remove('hidden');
