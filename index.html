@@ -854,7 +854,16 @@
                 mediaRecorder.start(100); isRecording = true; recordSeconds = 0;
                 document.getElementById('btn-record-container').classList.add('hidden'); document.getElementById('recording-indicator').classList.replace('hidden', 'flex');
                 recordTimerInterval = setInterval(() => { recordSeconds++; document.getElementById('record-time').textContent = `${Math.floor(recordSeconds/60).toString().padStart(2,'0')}:${(recordSeconds%60).toString().padStart(2,'0')}`; }, 1000);
-            } catch (err) { showToast('無法存取麥克風', 'error'); }
+            } catch (err) { 
+                console.error("麥克風存取錯誤細節:", err);
+                if (window.isSecureContext === false) {
+                    showToast('系統封鎖：麥克風必須在 HTTPS 加密網頁下才能啟用', 'error');
+                } else if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+                    showToast('麥克風權限被拒絕，請檢查網址列左側的鎖頭設定', 'error');
+                } else {
+                    showToast(`硬體或系統錯誤: ${err.message || err.name}`, 'error');
+                }
+            }
         }
 
         function stopRecording() {
