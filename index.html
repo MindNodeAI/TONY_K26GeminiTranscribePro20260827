@@ -494,8 +494,17 @@
         import { getFirestore, doc, getDoc, addDoc, setDoc, updateDoc, deleteDoc, collection, getDocs, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
 
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        // 直接寫入 TONY 老師的正式機專屬 Firebase 金鑰
+        const firebaseConfig = {
+            apiKey: "AIzaSyB7KwhWyC3Gt8LeOLBgaxcrmYwr8BAHwmg",
+            authDomain: "k18-tony-firebase.firebaseapp.com",
+            projectId: "k18-tony-firebase",
+            storageBucket: "k18-tony-firebase.firebasestorage.app",
+            messagingSenderId: "466595322499",
+            appId: "1:466595322499:web:e8da6daa00eed8223819b6",
+            measurementId: "G-NBJPYNTV4X"
+        };
+        const appId = firebaseConfig.appId;
         
         try {
             const app = initializeApp(firebaseConfig);
@@ -539,16 +548,7 @@
                 }
             };
 
-            // Initialize Auth (Sandbox token or Anonymous fallback)
-            async function initAuth() {
-                try {
-                    if (typeof __initial_auth_token !== 'undefined') await signInWithCustomToken(auth, __initial_auth_token);
-                    else await signInAnonymously(auth);
-                } catch (error) { console.error("Firebase 初始驗證失敗:", error); }
-            }
-            initAuth();
-
-            // Observe Auth State (Works for both Auto & Manual Google Login)
+            // 【修正重點】：刪除導致衝突的沙盒 Token (initAuth)，改為純淨的正式機監聽模式
             onAuthStateChanged(auth, (user) => {
                 window.currentUser = user;
                 window.firebaseReady = true;
@@ -668,7 +668,13 @@
         // ==========================================
         function setupSafeEventListeners() {
             // Google Login
-            document.getElementById('btn-google-login')?.addEventListener('click', () => { if(window.loginWithGoogle) window.loginWithGoogle(); });
+            document.getElementById('btn-google-login')?.addEventListener('click', () => { 
+                if (window.loginWithGoogle) {
+                    window.loginWithGoogle(); 
+                } else {
+                    showToast('系統錯誤：找不到 Firebase 伺服器設定！請先在程式碼填寫 firebaseConfig', 'error');
+                }
+            });
             document.getElementById('btn-logout')?.addEventListener('click', () => { if(window.logoutGoogle) window.logoutGoogle(); });
 
             // Tabs & Modals
