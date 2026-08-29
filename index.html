@@ -175,9 +175,12 @@
                 </div>
 
                 <!-- 錄音按鈕區 -->
-                <div class="mt-4 flex justify-center" id="btn-record-container">
-                    <button id="btn-record" class="flex items-center gap-2 px-8 py-3.5 bg-slate-800 hover:bg-slate-900 text-white rounded-full font-bold shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5 group">
-                        <i class="fas fa-microphone group-hover:scale-110 transition-transform"></i> 啟用麥克風錄音
+                <div class="mt-4 flex flex-col sm:flex-row justify-center gap-4" id="btn-record-container">
+                    <button id="btn-record" class="flex items-center justify-center gap-2 px-6 py-3.5 bg-slate-800 hover:bg-slate-900 text-white rounded-xl font-bold shadow-md hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5 group">
+                        <i class="fas fa-microphone group-hover:scale-110 transition-transform"></i> 一般麥克風錄音
+                    </button>
+                    <button id="btn-record-system" class="flex items-center justify-center gap-2 px-6 py-3.5 bg-red-500 hover:bg-red-600 text-white rounded-xl font-bold shadow-md hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5 group">
+                        <i class="fab fa-youtube group-hover:scale-110 transition-transform"></i> 擷取分頁 / YouTube 音訊
                     </button>
                 </div>
                 
@@ -688,6 +691,7 @@
             
             // Audio Core
             document.getElementById('btn-record')?.addEventListener('click', startRecording);
+            document.getElementById('btn-record-system')?.addEventListener('click', startSystemRecording);
             document.getElementById('btn-stop-record')?.addEventListener('click', stopRecording);
             document.getElementById('btn-process-audio')?.addEventListener('click', processAudioWithGemini);
             
@@ -1052,6 +1056,57 @@
                 const r = new FileReader(); r.readAsDataURL(audioBlob); 
                 r.onloadend = () => { audioBase64 = r.result.split(',')[1]; res(); } 
             }); 
+        }
+
+        async function startSystemRecording() {
+            try {
+                // 要求使用者選擇分頁並「強制分享音訊」
+                const stream = await navigator.mediaDevices.getDisplayMedia({ 
+                    video: { displaySurface: "browser" }, 
+                    audio: true 
+                });
+                
+                // 檢查使用者是否有勾選「分享音訊」
+                if (stream.getAudioTracks().length === 0) {
+                    showToast('操作錯誤：請務必在分享畫面時勾選「分享分頁音訊」！', 'error');
+                    stream.getTracks().forEach(t => t.stop());
+                    return;
+                }
+
+                // 只提取音訊軌道，拋棄影像軌道，節省記憶體
+                const audioStream = new MediaStream([stream.getAudioTracks()[0]]);
+                let mt = 'audio/webm'; if(!MediaRecorder.isTypeSupported(mt)) mt = 'audio/mp4'; if(!MediaRecorder.isTypeSupported(mt)) mt = '';
+                
+                mediaRecorder = mt ? new MediaRecorder(audioStream, { mimeType: mt }) : new MediaRecorder(audioStream); 
+                audioChunks = [];
+                mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
+                mediaRecorder.onstop = async () => {
+                    audioBlob = new Blob(audioChunks, { type: mt || 'audio/wav' }); 
+                    audioBlob.name = `YouTube_擷取音檔_${Date.now()}.webm`; 
+                    await prepareAudioForGemini();
+                    document.getElementById('audio-playback').src = URL.createObjectURL(audioBlob); 
+                    document.getElementById('audio-playback-container').classList.remove('hidden');
+                    document.getElementById('btn-process-audio').disabled = false;
+                    // 錄音結束後，自動停止瀏覽器的畫面分享標籤
+                    stream.getTracks().forEach(t => t.stop());
+                };
+                
+                mediaRecorder.start(100); isRecording = true; recordSeconds = 0;
+                document.getElementById('btn-record-container').classList.add('hidden'); 
+                document.getElementById('recording-indicator').classList.remove('hidden');
+                document.getElementById('recording-indicator').classList.add('flex');
+                
+                recordTimerInterval = setInterval(() => { 
+                    recordSeconds++; 
+                    document.getElementById('record-time').textContent = `${Math.floor(recordSeconds/60).toString().padStart(2,'0')}:${(recordSeconds%60).toString().padStart(2,'0')}`; 
+                }, 1000);
+
+                // 如果使用者從瀏覽器原生的「停止共用」按鈕關閉，也能正常存檔
+                stream.getVideoTracks()[0].onended = () => { if (isRecording) stopRecording(); };
+
+            } catch (err) { 
+                showToast(`擷取取消或授權失敗，請確認是否允許分享畫面`, 'warning'); 
+            }
         }
 
         async function startRecording() {
