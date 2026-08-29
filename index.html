@@ -937,13 +937,25 @@
                 
                 listEl.innerHTML = projects.map(p => `
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center p-5 bg-white border border-slate-200 rounded-xl mb-3 hover:border-blue-300 hover:shadow-md transition-all group">
-                        <div class="mb-4 sm:mb-0">
-                            <div class="font-bold text-slate-800 text-base flex items-center gap-2">
-                                <i class="fas ${p.audioUrl ? 'fa-file-audio' : 'fa-file-alt'} text-blue-500"></i> ${p.title}
+                        <div class="mb-4 sm:mb-0 w-full sm:w-auto flex-1 pr-4">
+                            <!-- 顯示模式 -->
+                            <div id="title-view-${p.id}" class="font-bold text-slate-800 text-base flex items-center gap-2">
+                                <i class="fas ${p.audioUrl ? 'fa-file-audio' : 'fa-file-alt'} text-blue-500"></i>
+                                <span id="title-text-${p.id}" class="truncate max-w-[180px] sm:max-w-[300px]">${p.title}</span>
+                                <button onclick="startRename('${p.id}')" class="text-slate-400 hover:text-brand-500 transition-colors p-1" title="重新命名">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            </div>
+                            <!-- 編輯模式 (預設隱藏) -->
+                            <div id="title-edit-${p.id}" class="hidden items-center gap-2 mt-1">
+                                <i class="fas ${p.audioUrl ? 'fa-file-audio' : 'fa-file-alt'} text-blue-500"></i>
+                                <input type="text" id="input-rename-${p.id}" value="${p.title}" class="px-2 py-1 text-sm border border-brand-300 rounded focus:outline-none focus:ring-1 focus:ring-brand-500 w-[150px] sm:w-[250px]">
+                                <button onclick="saveRename('${p.id}')" class="text-emerald-500 hover:text-emerald-600 bg-emerald-50 hover:bg-emerald-100 p-1.5 rounded transition-colors" title="儲存"><i class="fas fa-check"></i></button>
+                                <button onclick="cancelRename('${p.id}')" class="text-red-400 hover:text-red-500 bg-red-50 hover:bg-red-100 p-1.5 rounded transition-colors" title="取消"><i class="fas fa-times"></i></button>
                             </div>
                             <div class="text-xs text-slate-400 mt-1.5 font-medium"><i class="far fa-clock"></i> ${new Date(p.timestamp).toLocaleString('zh-TW')}</div>
                         </div>
-                        <div class="flex gap-2 w-full sm:w-auto">
+                        <div class="flex gap-2 w-full sm:w-auto mt-3 sm:mt-0">
                             <button onclick="loadCloudProject('${p.id}')" class="flex-1 sm:flex-none px-5 py-2.5 bg-blue-50 hover:bg-blue-600 text-blue-700 hover:text-white rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-2"><i class="fas fa-cloud-download-alt"></i> 載入</button>
                             <button onclick="deleteCloudProject('${p.id}')" class="flex-1 sm:flex-none px-4 py-2.5 bg-white hover:bg-red-50 text-red-500 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-2 border border-slate-200 hover:border-red-200"><i class="fas fa-trash-alt"></i> 刪除</button>
                         </div>
