@@ -842,26 +842,55 @@
 
         async function startRecording() {
             try {
+                // 1. 檢查是否在安全環境 (HTTPS)
+                if (window.isSecureContext === false) {
+                    return showToast('系統封鎖：麥克風必須在 HTTPS 加密網頁下才能啟用', 'error');
+                }
+                
+                // 2. 檢查瀏覽器是否把錄音 API 給閹割了 (常見於 Line/FB 內建瀏覽器或 Iframe 嵌入)
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    return showToast('環境阻擋：請使用 Safari 或 Chrome 原生瀏覽器開啟，勿使用 Line 內建瀏覽器', 'error');
+                }
+
+                // 3. 檢查 MediaRecorder 引擎支援度
+                if (typeof MediaRecorder === 'undefined') {
+                    return showToast('硬體過舊：您的設備或瀏覽器不支援音訊錄製引擎', 'error');
+                }
+
+                // 正式請求麥克風權限
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                let mt = 'audio/webm'; if(!MediaRecorder.isTypeSupported(mt)) mt = 'audio/mp4';
-                mediaRecorder = new MediaRecorder(stream, { mimeType: mt }); audioChunks = [];
+                
+                // 動態偵測設備支援的音軌格式 (蘋果與安卓的相容性處理)
+                let mt = 'audio/webm'; 
+                if(!MediaRecorder.isTypeSupported(mt)) {
+                    mt = 'audio/mp4';
+                    if (!MediaRecorder.isTypeSupported(mt)) mt = ''; // 若都不支援，讓瀏覽器自己決定預設格式
+                }
+                
+                mediaRecorder = mt ? new MediaRecorder(stream, { mimeType: mt }) : new MediaRecorder(stream); 
+                audioChunks = [];
                 mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
                 mediaRecorder.onstop = async () => {
-                    audioBlob = new Blob(audioChunks, { type: mt }); await prepareAudioForGemini();
+                    audioBlob = new Blob(audioChunks, { type: mt || 'audio/wav' }); await prepareAudioForGemini();
                     document.getElementById('audio-playback').src = URL.createObjectURL(audioBlob); document.getElementById('audio-playback-container').classList.remove('hidden');
                     const b = document.getElementById('btn-process-audio'); b.classList.remove('opacity-50', 'cursor-not-allowed'); b.disabled = false;
                 };
+                
                 mediaRecorder.start(100); isRecording = true; recordSeconds = 0;
                 document.getElementById('btn-record-container').classList.add('hidden'); document.getElementById('recording-indicator').classList.replace('hidden', 'flex');
-                recordTimerInterval = setInterval(() => { recordSeconds++; document.getElementById('record-time').textContent = `${Math.floor(recordSeconds/60).toString().padStart(2,'0')}:${(recordSeconds%60).toString().padStart(2,'0')}`; }, 1000);
+                recordTimerInterval = setInterval(() => { 
+                    recordSeconds++; 
+                    document.getElementById('record-time').textContent = `${Math.floor(recordSeconds/60).toString().padStart(2,'0')}:${(recordSeconds%60).toString().padStart(2,'0')}`; 
+                }, 1000);
+                
             } catch (err) { 
                 console.error("麥克風存取錯誤細節:", err);
-                if (window.isSecureContext === false) {
-                    showToast('系統封鎖：麥克風必須在 HTTPS 加密網頁下才能啟用', 'error');
-                } else if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-                    showToast('麥克風權限被拒絕，請檢查網址列左側的鎖頭設定', 'error');
+                if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+                    showToast('權限拒絕：請檢查網址列左側的鎖頭，允許麥克風權限', 'error');
+                } else if (err.name === 'NotFoundError') {
+                    showToast('找不到設備：系統偵測不到可用的麥克風硬體', 'error');
                 } else {
-                    showToast(`硬體或系統錯誤: ${err.message || err.name}`, 'error');
+                    showToast(`系統錯誤: ${err.message || err.name}`, 'error');
                 }
             }
         }
