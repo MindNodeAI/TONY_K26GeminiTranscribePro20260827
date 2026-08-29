@@ -1005,6 +1005,39 @@
             } catch(e) { window.showToast(`刪除失敗: ${e.message}`, 'error'); }
         };
 
+        window.startRename = function(id) {
+            document.getElementById(`title-view-${id}`).classList.add('hidden');
+            document.getElementById(`title-view-${id}`).classList.remove('flex');
+            document.getElementById(`title-edit-${id}`).classList.remove('hidden');
+            document.getElementById(`title-edit-${id}`).classList.add('flex');
+            document.getElementById(`input-rename-${id}`).focus();
+        };
+
+        window.cancelRename = function(id) {
+            document.getElementById(`title-edit-${id}`).classList.add('hidden');
+            document.getElementById(`title-edit-${id}`).classList.remove('flex');
+            document.getElementById(`title-view-${id}`).classList.remove('hidden');
+            document.getElementById(`title-view-${id}`).classList.add('flex');
+        };
+
+        window.saveRename = async function(id) {
+            if (!window.currentUser) return;
+            const newTitle = document.getElementById(`input-rename-${id}`).value.trim();
+            if (!newTitle) return window.showToast('名稱不能為空', 'warning');
+            
+            try {
+                const docRef = window.fsDoc(window.cloudDb, 'artifacts', window.cloudAppId, 'users', window.currentUser.uid, 'projects', id);
+                await window.fsUpdateDoc(docRef, { title: newTitle });
+                
+                // 動態更新畫面文字，無需重新讀取整個雲端列表
+                document.getElementById(`title-text-${id}`).textContent = newTitle;
+                window.cancelRename(id);
+                window.showToast('✅ 專案名稱已更新', 'success');
+            } catch (e) {
+                window.showToast(`更新失敗: ${e.message}`, 'error');
+            }
+        };
+
         // ==========================================
         // 匯出功能總管 (富文本 & Word)
         // ==========================================
