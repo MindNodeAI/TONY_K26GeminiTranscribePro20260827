@@ -1173,10 +1173,6 @@
         
         async function processSelectedFile(file) {
             // 防呆阻擋機制：超過 20MB 嚴格擋下
-            if (file.size > 20 * 1024 * 1024) {
-                window.showToast('檔案大小超過 20MB 上限，請先裁切後再上傳！', 'error');
-                return;
-            }
             try {
                 audioBlob = file; await prepareAudioForGemini();
                 document.getElementById('audio-playback').src = URL.createObjectURL(audioBlob); 
