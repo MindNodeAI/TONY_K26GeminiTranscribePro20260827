@@ -8,7 +8,7 @@
     <!-- 引入 Tailwind CSS 與 Typography 富文本排版外掛 -->
     <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- 引入 Marked.js 解析 Markdown 語法 -->
+    <!-- 引入 Marked.js 解析 Markdown 語法 (作為 Fallback 使用) -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     
     <script>
@@ -30,6 +30,7 @@
             }
         }
     </script>
+    
     <style>
         /* 平滑滾動與自訂捲軸 */
         html { scroll-behavior: smooth; }
@@ -71,11 +72,9 @@
     <!-- 全域 Toast 容器 -->
     <div id="toast-container" class="fixed top-5 right-5 z-[999999] flex flex-col gap-3 pointer-events-none"></div>
 
-    <!-- 導覽列 -->
     <nav class="bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-sm sticky top-0 z-50 transition-all">
         <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <!-- TONY STUDIO 專屬 Logo -->
                 <img src="https://i.postimg.cc/fT2sQW09/1.png" alt="TONY STUDIO Logo" class="w-10 h-10 object-contain drop-shadow-sm bg-white rounded-lg p-0.5 border border-slate-100">
                 <div>
                     <h1 class="text-lg font-bold text-slate-800 leading-tight tracking-tight">AI 語音與翻譯中心</h1>
@@ -83,7 +82,6 @@
                 </div>
             </div>
             
-            <!-- 右側功能區塊 -->
             <div class="flex items-center gap-2 sm:gap-3">
                 <button id="btn-user-guide" class="hidden md:flex items-center gap-2 px-3 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg text-sm font-bold transition-all shadow-sm border border-emerald-200 hover:-translate-y-0.5">
                     <i class="fas fa-book"></i>
@@ -99,7 +97,6 @@
                     <div id="api-status-indicator" class="w-3 h-3 rounded-full bg-red-500 absolute -top-1 -right-1 border-2 border-white shadow-sm transition-colors duration-300"></div>
                 </button>
 
-                <!-- 分隔線 -->
                 <div class="w-px h-6 bg-slate-200 mx-1"></div>
 
                 <!-- Google 登入區塊 -->
@@ -121,8 +118,6 @@
     </nav>
 
     <main class="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6 flex flex-col gap-6 relative">
-        
-        <!-- Tab 導覽列 -->
         <div class="flex bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden shrink-0 p-1 gap-1 max-w-xl mx-auto w-full">
             <button id="tab-btn-stt" class="flex-1 py-3 text-sm font-bold tab-active rounded-lg transition-all duration-300 flex justify-center items-center gap-2 shadow-sm">
                 <i class="fas fa-wave-square"></i> 語音轉錄 (STT)
@@ -135,14 +130,11 @@
         <!-- ================= Tab 1: 語音轉錄 (STT) ================= -->
         <section id="tab-stt" class="block space-y-6 animate-fade-in">
             
-            <!-- 區塊 1: 音訊輸入與專案控制 -->
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
                 <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-5">
                     <h2 class="text-base font-bold flex items-center gap-2 text-slate-800"><i class="fas fa-cloud-upload-alt text-brand-600"></i> 音訊輸入與專案庫</h2>
                     
-                    <!-- 專案存取功能 (雲端 + 本機) -->
                     <div class="flex flex-wrap gap-2 items-center bg-slate-50 p-1.5 rounded-lg border border-slate-100">
-                        <!-- 雲端專案按鈕 (藍色系) -->
                         <button id="btn-cloud-save" class="px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white rounded-md text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm hover:shadow-md hover:-translate-y-0.5" title="將當前進度與音檔同步至雲端">
                             <i class="fas fa-cloud-upload-alt"></i> 雲端存檔
                         </button>
@@ -152,7 +144,6 @@
                         
                         <div class="w-px h-5 bg-slate-300 mx-1 hidden sm:block"></div>
                         
-                        <!-- 本機專案按鈕 (灰色系) -->
                         <input type="file" id="load-project-input" accept=".json" class="hidden">
                         <button id="btn-load-project" class="px-3 py-1.5 bg-white hover:bg-slate-50 text-slate-600 rounded-md text-xs font-bold transition-all flex items-center gap-1.5 border border-slate-200" title="載入本機端專案檔 (.json)">
                             <i class="fas fa-folder-open"></i> 本機載入
@@ -163,7 +154,6 @@
                     </div>
                 </div>
                 
-                <!-- 拖曳上傳區 -->
                 <div id="upload-zone" class="border-2 border-dashed border-slate-300 rounded-xl p-8 text-center transition-all duration-300 cursor-pointer relative group overflow-hidden bg-slate-50/50 hover:bg-brand-50 hover:border-brand-400">
                     <input type="file" id="file-upload" class="hidden" accept="audio/*,video/*">
                     <div id="upload-icon-container" class="w-16 h-16 mx-auto bg-white shadow-sm group-hover:shadow text-slate-400 group-hover:text-brand-600 rounded-full flex items-center justify-center text-2xl mb-3 transition-all duration-300 group-hover:scale-110">
@@ -210,6 +200,7 @@
                         <i class="fas fa-stop mr-1"></i> 完成錄音
                     </button>
                 </div>
+
                 <!-- 音訊預覽區 -->
                 <div id="audio-playback-container" class="hidden mt-5 bg-slate-100/50 p-4 rounded-xl border border-slate-200 animate-fade-in">
                     <p class="text-xs font-bold text-slate-500 mb-2 ml-1">音訊預覽</p>
@@ -217,7 +208,6 @@
                 </div>
             </div>
 
-            <!-- 區塊 2: AI 參數設定與執行 -->
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
                 <div class="flex flex-wrap gap-5 mb-5">
                     <label class="flex items-center gap-2 cursor-pointer text-sm font-bold text-slate-700 group">
@@ -248,7 +238,7 @@
             <!-- 區塊 3: 處理結果輸出區 -->
             <div id="stt-output-section" class="hidden space-y-6 animate-fade-in">
                 
-                <!-- 原文逐字稿 (富文本) -->
+                <!-- 原文逐字稿 -->
                 <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 relative group hover:border-blue-200 transition-colors">
                     <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-3">
                         <h3 class="font-bold text-slate-800 flex items-center gap-2"><i class="fas fa-file-alt text-brand-500"></i> 原文逐字稿 <span id="label-srt-active" class="hidden text-[10px] bg-purple-100 text-purple-700 px-2 py-0.5 rounded font-bold shadow-sm">SRT 模式</span></h3>
@@ -269,7 +259,7 @@
                     <div id="stt-source-text" contenteditable="true" class="w-full min-h-[160px] p-5 bg-slate-50/50 border border-slate-200 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-brand-400 overflow-y-auto prose prose-slate prose-p:leading-relaxed prose-strong:text-red-700 prose-strong:bg-red-50 prose-strong:px-1 prose-strong:rounded max-w-none shadow-inner transition-all" placeholder="AI 逐字稿結果將顯示於此，您可直接點擊修改內容..."></div>
                 </div>
 
-                <!-- 翻譯結果 (富文本) -->
+                <!-- 翻譯結果 -->
                 <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 relative group hover:border-green-200 transition-colors">
                     <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-3">
                         <h3 class="font-bold text-slate-800 flex items-center gap-2"><i class="fas fa-language text-emerald-500"></i> 翻譯結果</h3>
@@ -288,7 +278,7 @@
                     <div id="stt-translated-text" contenteditable="true" class="w-full min-h-[120px] p-5 bg-slate-50/50 border border-slate-200 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-emerald-400 overflow-y-auto prose prose-slate prose-p:leading-relaxed prose-strong:text-emerald-700 prose-strong:bg-emerald-50 prose-strong:px-1 prose-strong:rounded max-w-none shadow-inner transition-all" placeholder="若有勾選自動翻譯，結果將顯示於此..."></div>
                 </div>
 
-                <!-- AI 智慧助手 -->
+                <!-- AI 智慧助手 (JSON 結構化輸出) -->
                 <div class="bg-slate-800 p-6 rounded-2xl shadow-lg border border-slate-700 relative overflow-hidden">
                     <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-brand-500 rounded-full blur-[80px] opacity-20 pointer-events-none"></div>
                     
@@ -318,7 +308,6 @@
 
         <!-- ================= Tab 2: 智慧文字翻譯 ================= -->
         <section id="tab-translate" class="block space-y-6 animate-fade-in" style="display:none;">
-            <!-- 翻譯設定與輸入區 -->
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
                 <div class="flex flex-col sm:flex-row gap-5 mb-5">
                     <div class="flex-1">
@@ -356,7 +345,6 @@
                 </button>
             </div>
 
-            <!-- 翻譯結果輸出區 -->
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 relative group hover:border-brand-200 transition-colors">
                 <div id="translation-loading" class="hidden absolute inset-0 bg-white/90 backdrop-blur-sm z-10 rounded-2xl items-center justify-center flex-col gap-3">
                     <div class="relative w-12 h-12">
@@ -382,17 +370,14 @@
         </section>
     </main>
 
-    <!-- TONY STUDIO 專屬版權宣告 Footer -->
     <footer class="mt-auto py-8 border-t border-slate-200 bg-slate-100 text-center">
         <div class="max-w-6xl mx-auto px-4 flex flex-col items-center gap-2">
             <img src="https://i.postimg.cc/fT2sQW09/1.png" alt="TONY STUDIO" class="w-8 h-8 object-contain opacity-70 grayscale">
-            <p class="text-xs text-slate-500 font-medium tracking-wide">© 2026 TONY STUDIO. 本教材由 TONY STUDIO 楊文澤顧問設計. All Rights Reserved.</p>
+            <p class="text-xs text-slate-500 font-medium tracking-wide">&copy; 2020 TonyStudio (TONY 楊文澤顧問). All Rights Reserved.</p>
         </div>
     </footer>
 
     <!-- ================= Modals (彈出視窗) ================= -->
-    
-    <!-- 操作指南 Modal -->
     <div id="modal-guide" class="hidden fixed inset-0 z-[99999] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
         <div id="modal-guide-content" class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl overflow-hidden scale-95 transition-transform duration-300 max-h-[90vh] flex flex-col">
             <div class="bg-slate-50 px-6 py-4 border-b border-slate-100 flex justify-between items-center shrink-0">
@@ -405,29 +390,22 @@
             <div class="p-6 overflow-y-auto custom-scrollbar flex-1 bg-white">
                 <div id="guide-content" class="prose prose-slate max-w-none">
                     <h2 class="text-center text-brand-700 border-b pb-4">TONY STUDIO 企業級 AI 語音與翻譯中心 - 官方操作指南</h2>
-                    
                     <h3 class="text-brand-600"><i class="fas fa-key"></i> 1. 系統初始化 (API 金鑰設定)</h3>
                     <p>本系統由 Google Gemini 驅動。首次使用請點擊右上角「<strong>API 設定</strong>」，輸入您的專屬 Gemini API Key。若無金鑰，設定視窗內提供 Google 官方免費申請連結。</p>
-
                     <h3 class="text-brand-600"><i class="fab fa-youtube text-red-500"></i> 2. 擷取 YouTube / 線上會議音訊 (殺手級功能)</h3>
                     <ul>
                         <li>點擊紅色的「<strong>擷取分頁 / YouTube 音訊</strong>」按鈕。</li>
                         <li>在彈出的系統視窗中，選擇「<strong>Chrome 分頁</strong>」並點選您要錄音的 YouTube 或會議分頁。</li>
                         <li><strong class="text-red-600 bg-red-50 px-1 rounded">最重要：務必勾選視窗左下角的「分享分頁音訊」！</strong>否則系統將無法收音並會自動中斷。</li>
                     </ul>
-
                     <h3 class="text-brand-600"><i class="fas fa-magic"></i> 3. AI 逐字稿與智慧排版</h3>
                     <p>錄音或上傳音檔完成後，點選「<strong>開始 AI 語音處理</strong>」。系統會自動產出具有<strong>段落與粗體重點</strong>的逐字稿。您可以點擊「<strong>AI 智慧助手</strong>」將其一鍵轉換為條列式摘要或待辦事項。</p>
-
                     <h3 class="text-brand-600"><i class="fas fa-file-word text-blue-600"></i> 4. 匯出完美排版的 Word 報告</h3>
                     <p>每個文字區塊的右上角都有「<strong>儲存 Word</strong>」按鈕。點擊後，系統會將畫面上的粗體、顏色、段落等富文本格式，<strong>100% 完美轉換為 Word 檔案</strong>，省去人工重新排版的時間。</p>
-                    
                     <h3 class="text-brand-600"><i class="fas fa-volume-up text-emerald-600"></i> 5. 11 國智慧翻譯與母語朗讀</h3>
                     <p>切換至「智慧文字翻譯」分頁，輸入文字並選擇 11 國語言與語氣，AI 將進行在地化翻譯。點擊「<strong>母語高音質朗讀</strong>」，系統將呼叫最新官方引擎發出流暢的當地母語發音。</p>
-
                     <h3 class="text-brand-600"><i class="fas fa-cloud text-blue-500"></i> 6. Google 登入與雲端專案庫</h3>
                     <p>點擊右上角登入 Google 帳號。處理完的專案可點擊「<strong>雲端存檔</strong>」，系統會將您的<strong>原始錄音檔與所有文字</strong>安全儲存至 Firebase 雲端。即使更換電腦，點擊「雲端專案庫」也能一秒恢復所有進度！</p>
-
                     <h3 class="text-red-600 border-t pt-5 mt-5"><i class="fas fa-exclamation-triangle"></i> 7. 系統限制與防呆機制說明 (必看)</h3>
                     <div class="bg-red-50 p-5 rounded-xl border border-red-200 text-sm shadow-inner">
                         <ul class="mb-0 space-y-3 text-slate-700">
@@ -441,7 +419,6 @@
         </div>
     </div>
 
-    <!-- API 金鑰設定 Modal -->
     <div id="modal-apikey" class="hidden fixed inset-0 z-[99999] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
         <div id="modal-apikey-content" class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden scale-95 transition-transform duration-300 flex flex-col">
             <div class="bg-slate-50 px-6 py-4 border-b border-slate-100 flex justify-between items-center shrink-0">
@@ -462,7 +439,6 @@
         </div>
     </div>
 
-    <!-- TONY 顧問簡介 Modal -->
     <div id="modal-creator" class="hidden fixed inset-0 z-[99999] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
         <div id="modal-creator-content" class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden scale-95 transition-transform duration-300 flex flex-col max-h-[90vh]">
             <div class="bg-brand-50 px-6 py-4 border-b border-brand-100 flex justify-between items-center shrink-0">
@@ -507,7 +483,6 @@
         </div>
     </div>
 
-    <!-- 30分鐘上限提醒 Modal -->
     <div id="modal-record-limit" class="hidden fixed inset-0 z-[99999] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
         <div id="modal-record-limit-content" class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden scale-95 transition-transform duration-300 flex flex-col">
             <div class="bg-amber-50 px-6 py-4 border-b border-amber-100 flex justify-between items-center shrink-0">
@@ -522,7 +497,6 @@
         </div>
     </div>
 
-    <!-- 儲存選項確認 Modal (另存新檔 vs 覆蓋) -->
     <div id="modal-save-options" class="hidden fixed inset-0 z-[99999] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
         <div id="modal-save-options-content" class="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden scale-95 transition-transform duration-300 flex flex-col">
             <div class="bg-blue-50 px-6 py-4 border-b border-blue-100 flex justify-between items-center shrink-0">
@@ -537,7 +511,6 @@
         </div>
     </div>
 
-    <!-- 雲端專案庫 Modal -->
     <div id="modal-cloud" class="hidden fixed inset-0 z-[99999] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
         <div id="modal-cloud-content" class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden scale-95 transition-transform duration-300 flex flex-col max-h-[85vh]">
             <div class="bg-slate-50 px-6 py-4 border-b border-slate-100 flex justify-between items-center shrink-0">
@@ -550,7 +523,6 @@
         </div>
     </div>
 
-    <!-- ================= 核心 Scripts ================= -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -620,15 +592,14 @@
     <script>
         // 【AI 模型集中控制中心】 
         const MODELS = {
-            TEXT_AND_TRANSLATE: "gemini-3.7-flash",    
+            TEXT_AND_TRANSLATE: "gemini-3.8-flash",    
             STT_TRANSCRIBE: "gemini-3.5-transcribe",   
             TTS_VOICE: "gemini-2.5-flash-preview-tts"  
         };
 
-        // 全域狀態變數
         let currentApiKey = localStorage.getItem('gemini_api_key') || '';
-        let currentCloudProjectId = null; // 記住當前編輯的雲端專案 ID
-        let mediaRecorder; 
+        let currentCloudProjectId = null; 
+        let mediaRecorder = null; 
         let audioChunks = []; 
         let audioBlob = null; 
         let audioBase64 = null;
@@ -636,7 +607,6 @@
         let recordTimerInterval; 
         let recordSeconds = 0;
 
-        // 初始化
         document.addEventListener('DOMContentLoaded', () => { 
             updateApiKeyUI();
             setupSafeEventListeners();
@@ -710,118 +680,58 @@
             if(ind) ind.className = currentApiKey ? "w-3 h-3 rounded-full bg-emerald-500 absolute -top-1 -right-1 border-2 border-white shadow-[0_0_8px_rgba(16,185,129,0.6)]" : "w-3 h-3 rounded-full bg-red-500 absolute -top-1 -right-1 border-2 border-white shadow-[0_0_8px_rgba(239,68,68,0.6)]";
         }
 
-        
-        // --- TONY STUDIO 新增引擎：音訊壓縮與 YouTube 下載 ---
-        async function compressAudio(file, targetSampleRate = 16000) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = async (e) => {
-                    try {
-                        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                        const audioBuffer = await audioContext.decodeAudioData(e.target.result);
-                        const offlineContext = new OfflineAudioContext(1, audioBuffer.duration * targetSampleRate, targetSampleRate);
-                        const source = offlineContext.createBufferSource();
-                        source.buffer = audioBuffer;
-                        source.connect(offlineContext.destination);
-                        source.start(0);
-                        const renderedBuffer = await offlineContext.startRendering();
-                        const wavBlob = audioBufferToWav(renderedBuffer);
-                        const newFileName = "compressed_" + file.name.replace(/\.[^/.]+$/, ".wav");
-                        resolve(new File([wavBlob], newFileName, { type: "audio/wav" }));
-                    } catch (err) { reject(err); }
-                };
-                reader.onerror = reject;
-                reader.readAsArrayBuffer(file);
-            });
-        }
-
-        function audioBufferToWav(buffer) {
-            const numOfChan = buffer.numberOfChannels, length = buffer.length * numOfChan * 2 + 44;
-            const out = new DataView(new ArrayBuffer(length));
-            let pos = 0;
-            const writeString = (str) => { for (let i = 0; i < str.length; i++) out.setUint8(pos + i, str.charCodeAt(i)); pos += str.length; };
-            const writeUint16 = (data) => { out.setUint16(pos, data, true); pos += 2; };
-            const writeUint32 = (data) => { out.setUint32(pos, data, true); pos += 4; };
-            writeString('RIFF'); writeUint32(length - 8); writeString('WAVE');
-            writeString('fmt '); writeUint32(16); writeUint16(1); writeUint16(numOfChan);
-            writeUint32(buffer.sampleRate); writeUint32(buffer.sampleRate * 2 * numOfChan);
-            writeUint16(numOfChan * 2); writeUint16(16); writeString('data'); writeUint32(length - pos - 4);
-            const channels = [];
-            for (let i = 0; i < numOfChan; i++) channels.push(buffer.getChannelData(i));
-            let offset = 0;
-            while (pos < length) {
-                for (let i = 0; i < numOfChan; i++) {
-                    let sample = Math.max(-1, Math.min(1, channels[i][offset]));
-                    sample = (0.5 + sample < 0 ? sample * 32768 : sample * 32767) | 0;
-                    out.setInt16(pos, sample, true); pos += 2;
-                }
-                offset++;
-            }
-            return new Blob([out], { type: "audio/wav" });
-        }
-
-        function handleYouTubeSubmit() {
-            const urlInput = document.getElementById("youtube-url-input");
-            const submitBtn = document.getElementById("youtube-process-btn");
-            const url = urlInput.value.trim();
-            if (!url) return window.showToast("請貼上 YouTube 影片網址！", "error");
-            if (!url.includes("youtube.com") && !url.includes("youtu.be")) return window.showToast("無效的 YouTube 網址", "error");
-            
-            urlInput.disabled = true; submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 處理中...';
-
-            processYouTubeUrl(url).finally(() => {
-                urlInput.disabled = false; submitBtn.disabled = false;
-                submitBtn.innerHTML = '雲端解析'; urlInput.value = ""; 
-            });
-        }
-
-        async function processYouTubeUrl(url) {
-            window.showToast("伺服器正在提取 YouTube 音軌...", "info");
+        // ==========================================
+        // 企業級容錯解析：Self-Healing JSON
+        // ==========================================
+        function extractAndParseJSON(rawText) {
+            if (!rawText) return null;
             try {
-                const response = await fetch("https://us-central1-k18-tony-firebase.cloudfunctions.net/downloadYtAudio", {
-                    method: "POST", headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ url: url })
-                });
-                const data = await response.json();
-                if (data.success && data.audioUrl) {
-                    window.showToast("提取完成！請點擊『開始 AI 處理』", "success");
-                    
-                    const audioRes = await fetch(data.audioUrl);
-                    audioBlob = await audioRes.blob();
-                    audioBlob.isCloudUrl = true; 
-                    audioBlob.name = `YouTube_雲端匯入_${Date.now()}.mp4`;
-                    
-                    await prepareAudioForGemini();
-                    document.getElementById('audio-playback').src = data.audioUrl;
-                    document.getElementById('audio-playback-container').classList.remove('hidden');
-                    document.getElementById('btn-process-audio').disabled = false;
-                    
-                    const fi = document.getElementById('selected-file-info');
-                    fi.innerHTML = `<i class="fab fa-youtube mr-1 text-red-500"></i> 已載入 YouTube 雲端音軌`;
-                    fi.classList.remove('hidden');
-                } else {
-                    window.showToast("解析失敗：" + (data.error || "未知錯誤"), "error");
+                // 1. 去除常見的 Markdown Code Block 標記符號
+                let cleanText = rawText.replace(/```json\n?/gi, '').replace(/```\n?/g, '').trim();
+                
+                // 2. 利用正則與索引，精準鎖定結構邊界
+                const firstBrace = cleanText.indexOf('{');
+                const lastBrace = cleanText.lastIndexOf('}');
+                const firstBracket = cleanText.indexOf('[');
+                const lastBracket = cleanText.lastIndexOf(']');
+                
+                let start = -1;
+                let end = -1;
+                
+                // 判斷是 Object 還是 Array
+                if (firstBrace !== -1 && (firstBracket === -1 || firstBrace < firstBracket)) {
+                    start = firstBrace;
+                    end = lastBrace;
+                } else if (firstBracket !== -1) {
+                    start = firstBracket;
+                    end = lastBracket;
                 }
-            } catch (err) {
-                window.showToast("連線失敗，請檢查 API IAM 權限", "error");
-                console.error(err);
+                
+                // 3. 提取核心 JSON 內容並嘗試解析
+                if (start !== -1 && end !== -1 && end >= start) {
+                    const jsonStr = cleanText.substring(start, end + 1);
+                    return JSON.parse(jsonStr);
+                }
+                
+                // Fallback: 嘗試直接解析
+                return JSON.parse(cleanText);
+            } catch (error) {
+                console.error("企業級自癒解析模組警告: 無法還原 JSON 結構", error);
+                return null; // 若徹底損毀，回傳 null 以觸發後續的 Fallback 機制
             }
         }
-        
+
         
         // ==========================================
         // 防呆事件綁定總管
         // ==========================================
         function setupSafeEventListeners() {
-            // Google Login
             document.getElementById('btn-google-login')?.addEventListener('click', () => { 
                 if (window.loginWithGoogle) window.loginWithGoogle(); 
                 else window.showToast('連線模組準備中，請稍候再試', 'warning');
             });
             document.getElementById('btn-logout')?.addEventListener('click', () => { if(window.logoutGoogle) window.logoutGoogle(); });
 
-            // Tabs & Modals
             document.getElementById('tab-btn-stt')?.addEventListener('click', () => switchTab('stt'));
             document.getElementById('tab-btn-translate')?.addEventListener('click', () => switchTab('translate'));
             
@@ -837,22 +747,18 @@
 
             document.getElementById('btn-close-record-limit')?.addEventListener('click', () => toggleModal('modal-record-limit', 'modal-record-limit-content'));
 
-            // Audio Core
             document.getElementById('btn-record')?.addEventListener('click', startRecording);
             document.getElementById('btn-record-system')?.addEventListener('click', startSystemRecording);
             document.getElementById('btn-stop-record')?.addEventListener('click', stopRecording);
             document.getElementById('btn-process-audio')?.addEventListener('click', processAudioWithGemini);
             
-            // Translation Core
             document.getElementById('btn-translate-text')?.addEventListener('click', processTextTranslation);
             document.getElementById('btn-play-audio')?.addEventListener('click', playTranslatedAudio);
             
-            // AI Assistant Core
             document.getElementById('btn-ai-summary')?.addEventListener('click', () => runAIAssistant('summary'));
             document.getElementById('btn-ai-action')?.addEventListener('click', () => runAIAssistant('action'));
             document.getElementById('btn-ai-grammar')?.addEventListener('click', () => runAIAssistant('grammar'));
             
-            // Export & Copy Core (富文本支援)
             document.getElementById('btn-copy-stt')?.addEventListener('click', () => copyToClipboard('stt-source-text'));
             document.getElementById('btn-export-srt')?.addEventListener('click', exportToSRT);
             document.getElementById('btn-word-stt')?.addEventListener('click', () => exportToWord('stt-source-text', '原文逐字稿'));
@@ -868,7 +774,6 @@
             
             document.getElementById('btn-word-guide')?.addEventListener('click', () => exportToWord('guide-content', 'TONY_STUDIO_系統操作手冊'));
 
-            // Project Save/Load (Local & Cloud)
             document.getElementById('btn-save-project')?.addEventListener('click', saveProjectData);
             document.getElementById('load-project-input')?.addEventListener('change', loadProjectData);
             document.getElementById('btn-load-project')?.addEventListener('click', () => document.getElementById('load-project-input')?.click());
@@ -877,7 +782,6 @@
             document.getElementById('btn-cloud-load')?.addEventListener('click', openCloudModal);
             document.getElementById('btn-close-cloud-modal')?.addEventListener('click', closeCloudModal);
 
-            // Cloud Save Options Events
             document.getElementById('btn-save-overwrite')?.addEventListener('click', () => { toggleModal('modal-save-options', 'modal-save-options-content'); executeCloudSave(currentCloudProjectId); });
             document.getElementById('btn-save-new')?.addEventListener('click', () => { toggleModal('modal-save-options', 'modal-save-options-content'); executeCloudSave(null); });
             document.getElementById('btn-close-save-options')?.addEventListener('click', () => toggleModal('modal-save-options', 'modal-save-options-content'));
@@ -937,7 +841,6 @@
             finally { btn.innerHTML = orig; btn.disabled = false; }
         }
 
-        // 清除畫布 (載入前使用)
         function resetWorkspace() {
             document.getElementById('stt-source-text').innerHTML = '';
             document.getElementById('stt-translated-text').innerHTML = '';
@@ -962,7 +865,6 @@
             currentCloudProjectId = null;
         }
 
-        // 專案快照 (富文本支援)
         function getProjectSnapshot() {
             return {
                 sttSource: document.getElementById('stt-source-text').innerHTML,
@@ -984,7 +886,6 @@
             document.getElementById('stt-output-section').classList.remove('hidden');
         }
 
-        // 本機端備份 (含 Base64 音檔封裝)
         async function saveProjectData() {
             try {
                 let currentAudioData = null;
@@ -1009,7 +910,7 @@
             const reader = new FileReader();
             reader.onload = async (e) => {
                 try {
-                    resetWorkspace(); // 載入前先清空
+                    resetWorkspace();
                     const data = JSON.parse(e.target.result);
                     restoreProjectSnapshot(data);
                     
@@ -1033,27 +934,18 @@
             reader.readAsText(file);
         }
 
-        // Firebase 雲端存檔 (判斷覆蓋或另存)
         async function saveCloudProject() {
             if (!window.firebaseReady || !window.currentUser) return window.showToast('雲端伺服器連線中，或請先登入帳號', 'warning');
-            
-            if (currentCloudProjectId) {
-                // 如果已經有載入紀錄，跳出詢問視窗
-                toggleModal('modal-save-options', 'modal-save-options-content');
-            } else {
-                // 全新專案，直接存檔
-                executeCloudSave(null);
-            }
+            if (currentCloudProjectId) toggleModal('modal-save-options', 'modal-save-options-content');
+            else executeCloudSave(null);
         }
         
-        // 實際執行寫入 Firebase 的動作
         async function executeCloudSave(docIdToUpdate) {
             const btn = document.getElementById('btn-cloud-save');
             const orig = btn.innerHTML; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 上傳中...'; btn.disabled = true;
             
             try {
                 let downloadUrl = null;
-                // 只有當音檔是「新錄製/新上傳」的 (沒有 isCloudUrl 標記) 才需要上傳
                 if (audioBlob && !audioBlob.isCloudUrl && window.cloudStorage) {
                     window.showToast('正在上傳音檔至雲端儲存桶...', 'info');
                     const fileName = audioBlob.name || `audio_${Date.now()}.webm`;
@@ -1061,7 +953,6 @@
                     await window.fsUploadBytes(storageRef, audioBlob);
                     downloadUrl = await window.fsGetDownloadURL(storageRef);
                 } else if (audioBlob && audioBlob.isCloudUrl) {
-                    // 如果是從雲端載入的舊音檔，保留舊網址
                     downloadUrl = document.getElementById('audio-playback').src;
                 }
 
@@ -1072,16 +963,14 @@
                 if (downloadUrl) projectData.audioUrl = downloadUrl;
                 
                 if (docIdToUpdate) {
-                    // 覆蓋原檔
                     const docRef = window.fsDoc(window.cloudDb, 'artifacts', window.cloudAppId, 'users', window.currentUser.uid, 'projects', docIdToUpdate);
                     await window.fsUpdateDoc(docRef, projectData);
                     window.showToast('專案進度已成功覆蓋更新！', 'success');
                 } else {
-                    // 另存新檔 (需要給予標題)
                     projectData.title = `雲端紀錄_${new Date().toLocaleString('zh-TW', { hour12: false, month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' })}`;
                     const colRef = window.fsCollection(window.cloudDb, 'artifacts', window.cloudAppId, 'users', window.currentUser.uid, 'projects');
                     const newDoc = await window.fsAddDoc(colRef, projectData);
-                    currentCloudProjectId = newDoc.id; // 更新當前綁定 ID
+                    currentCloudProjectId = newDoc.id;
                     window.showToast('專案與音檔已成功建立新檔 ☁️', 'success');
                 }
             } catch (error) { 
@@ -1091,7 +980,6 @@
             }
         }
 
-        // 雲端專案庫 UI 與載入邏輯
         function closeCloudModal() { toggleModal('modal-cloud', 'modal-cloud-content'); }
 
         async function openCloudModal() {
@@ -1145,17 +1033,17 @@
                 const docRef = window.fsDoc(window.cloudDb, 'artifacts', window.cloudAppId, 'users', window.currentUser.uid, 'projects', docId);
                 const snap = await window.fsGetDoc(docRef);
                 if (snap.exists()) {
-                    resetWorkspace(); // 載入前先清除舊資料
+                    resetWorkspace();
                     const data = snap.data();
                     restoreProjectSnapshot(data);
-                    currentCloudProjectId = docId; // 記住當前載入的專案 ID
+                    currentCloudProjectId = docId;
                     
                     if (data.audioUrl) {
                         try {
                             const response = await fetch(data.audioUrl);
                             if (response.ok) {
                                 audioBlob = await response.blob();
-                                audioBlob.isCloudUrl = true; // 標記為雲端下載的音檔，避免覆蓋時重複上傳
+                                audioBlob.isCloudUrl = true; 
                                 await prepareAudioForGemini();
                                 document.getElementById('audio-playback').src = URL.createObjectURL(audioBlob);
                                 document.getElementById('audio-playback-container').classList.remove('hidden');
@@ -1227,9 +1115,6 @@
             }
         };
 
-        // ==========================================
-        // 匯出功能總管 (富文本 & Word)
-        // ==========================================
         function copyToClipboard(id) {
             const el = document.getElementById(id); if(!el) return;
             const t = el.tagName === 'TEXTAREA' || el.tagName === 'INPUT' ? el.value : el.innerText;
@@ -1272,9 +1157,54 @@
             const l = document.createElement('a'); l.href = URL.createObjectURL(b); l.download = `Subtitle_${Date.now()}.srt`; l.click();
         }
 
-        // ==========================================
-        // 音訊上傳與錄音邏輯
-        // ==========================================
+        async function compressAudio(file, targetSampleRate = 16000) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = async (e) => {
+                    try {
+                        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                        const audioBuffer = await audioContext.decodeAudioData(e.target.result);
+                        const offlineContext = new OfflineAudioContext(1, audioBuffer.duration * targetSampleRate, targetSampleRate);
+                        const source = offlineContext.createBufferSource();
+                        source.buffer = audioBuffer;
+                        source.connect(offlineContext.destination);
+                        source.start(0);
+                        const renderedBuffer = await offlineContext.startRendering();
+                        const wavBlob = audioBufferToWav(renderedBuffer);
+                        const newFileName = "compressed_" + file.name.replace(/\.[^/.]+$/, ".wav");
+                        resolve(new File([wavBlob], newFileName, { type: "audio/wav" }));
+                    } catch (err) { reject(err); }
+                };
+                reader.onerror = reject;
+                reader.readAsArrayBuffer(file);
+            });
+        }
+
+        function audioBufferToWav(buffer) {
+            const numOfChan = buffer.numberOfChannels, length = buffer.length * numOfChan * 2 + 44;
+            const out = new DataView(new ArrayBuffer(length));
+            let pos = 0;
+            const writeString = (str) => { for (let i = 0; i < str.length; i++) out.setUint8(pos + i, str.charCodeAt(i)); pos += str.length; };
+            const writeUint16 = (data) => { out.setUint16(pos, data, true); pos += 2; };
+            const writeUint32 = (data) => { out.setUint32(pos, data, true); pos += 4; };
+            writeString('RIFF'); writeUint32(length - 8); writeString('WAVE');
+            writeString('fmt '); writeUint32(16); writeUint16(1); writeUint16(numOfChan);
+            writeUint32(buffer.sampleRate); writeUint32(buffer.sampleRate * 2 * numOfChan);
+            writeUint16(numOfChan * 2); writeUint16(16); writeString('data'); writeUint32(length - pos - 4);
+            const channels = [];
+            for (let i = 0; i < numOfChan; i++) channels.push(buffer.getChannelData(i));
+            let offset = 0;
+            while (pos < length) {
+                for (let i = 0; i < numOfChan; i++) {
+                    let sample = Math.max(-1, Math.min(1, channels[i][offset]));
+                    sample = (0.5 + sample < 0 ? sample * 32768 : sample * 32767) | 0;
+                    out.setInt16(pos, sample, true); pos += 2;
+                }
+                offset++;
+            }
+            return new Blob([out], { type: "audio/wav" });
+        }
+
         async function handleFileUpload(e) { if (e.target.files.length > 0) processSelectedFile(e.target.files[0]); }
         
         async function processSelectedFile(file) {
@@ -1345,7 +1275,6 @@
                     recordSeconds++; 
                     document.getElementById('record-time').textContent = `${Math.floor(recordSeconds/60).toString().padStart(2,'0')}:${(recordSeconds%60).toString().padStart(2,'0')}`; 
                     
-                    // 30分鐘 (1800秒) 自動停止防護
                     if (recordSeconds >= 1800) {
                         stopRecording();
                         toggleModal('modal-record-limit', 'modal-record-limit-content');
@@ -1394,7 +1323,6 @@
                     recordSeconds++; 
                     document.getElementById('record-time').textContent = `${Math.floor(recordSeconds/60).toString().padStart(2,'0')}:${(recordSeconds%60).toString().padStart(2,'0')}`; 
                     
-                    // 30分鐘 (1800秒) 自動停止防護
                     if (recordSeconds >= 1800) {
                         stopRecording();
                         toggleModal('modal-record-limit', 'modal-record-limit-content');
@@ -1448,10 +1376,10 @@
             if(isAuto) setUILoading(true, 'stt-trans-loading');
             
             try {
-                let prompt = "請聆聽音檔並轉錄為文字。請務必使用 Markdown 格式排版，分段清楚，並使用 **粗體** 標示專有名詞或重要關鍵字。\n";
-                if(isSrt && isDia) prompt += "【輸出】標準 SRT 字幕，並標記講者。\n";
-                else if(isSrt) prompt += "【輸出】標準 SRT 字幕。\n";
-                else if(isDia) prompt += "【輸出】逐字稿並標記講者。\n";
+                let prompt = "請扮演專業的語音轉錄專家。請聆聽音檔並轉錄為流暢的文字。\n【輸出規範】\n1. 絕對不可包含 '```markdown' 或 '```' 等代碼塊標記。\n2. 分段清楚，並將會議中的專有名詞或重要關鍵字使用 **粗體** 標示。\n";
+                if(isSrt && isDia) prompt += "【輸出格式】標準 SRT 字幕，並標記講者。\n";
+                else if(isSrt) prompt += "【輸出格式】標準 SRT 字幕。\n";
+                else if(isDia) prompt += "【輸出格式】逐字稿並標記講者。\n";
                 if(vocab) prompt += `【優先詞庫】${vocab}\n`; 
 
                 let mt = (audioBlob.type || "audio/mpeg").split(';')[0];
@@ -1478,16 +1406,17 @@
                 }
 
                 setUILoading(false, 'stt-source-loading');
-                document.getElementById('stt-source-text').innerHTML = isSrt ? `<pre class="whitespace-pre-wrap">${srcTxt.trim()}</pre>` : marked.parse(srcTxt.trim());
+                const finalSrcText = srcTxt.replace(/```markdown\n?/gi, '').replace(/```\n?/g, '').trim();
+                document.getElementById('stt-source-text').innerHTML = isSrt ? `<pre class="whitespace-pre-wrap">${finalSrcText}</pre>` : marked.parse(finalSrcText);
                 
-                if (isAuto && !srcTxt.includes("【未能辨識")) {
-                    const trPrompt = `Translate the following transcript to Traditional Chinese. Please format using Markdown, clear paragraphs, and use **bold** for key concepts.\n\n${srcTxt}`;
+                if (isAuto && !finalSrcText.includes("【未能辨識")) {
+                    const trPrompt = `請扮演資深在地化翻譯專家。將以下逐字稿翻譯為繁體中文。\n【輸出規範】\n1. 絕對不可包含 '\`\`\`markdown' 標記。\n2. 請使用清晰的段落排版，並將關鍵字保留 **粗體** 標示。\n\n${finalSrcText}`;
                     const tRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODELS.TEXT_AND_TRANSLATE}:generateContent?key=${currentApiKey}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [{ role: "user", parts: [{ text: trPrompt }] }] }) });
                     if (tRes.ok) { 
                         const tr = await tRes.json(); 
                         const rawTrans = tr?.candidates?.[0]?.content?.parts?.[0]?.text || "翻譯失敗"; 
                         setUILoading(false, 'stt-trans-loading');
-                        document.getElementById('stt-translated-text').innerHTML = marked.parse(rawTrans.trim());
+                        document.getElementById('stt-translated-text').innerHTML = marked.parse(rawTrans.replace(/```markdown\n?/gi, '').replace(/```\n?/g, '').trim());
                     }
                 }
                 
@@ -1505,46 +1434,6 @@
             }
         }
 
-        async function runAIAssistant(type) {
-            if(!currentApiKey) return window.showToast('請先設定 API 金鑰', 'error');
-            const txt = document.getElementById('stt-source-text').innerText.trim(); 
-            if(!txt || txt.includes('【錯誤】')) return window.showToast('無有效的逐字稿內容', 'warning');
-            
-            const l = document.getElementById('ai-assistant-loading'); 
-            const o = document.getElementById('ai-assistant-output'); 
-            const lt = document.getElementById('ai-assistant-loading-text');
-            
-            l.classList.remove('hidden'); l.classList.add('flex'); o.innerHTML = ''; 
-            
-            let p = ""; 
-            if(type === 'summary') { 
-                lt.textContent='AI 正在整理企業級重點摘要排版...'; 
-                p=`請整理以下內容的重點摘要。必須使用 Markdown 格式排版，包含大標題、條列式重點清單，並且強烈要求使用 **粗體字** 強調所有重要的關鍵字。\n\n內容：\n${txt}`; 
-            } 
-            else if(type === 'action') { 
-                lt.textContent='AI 正在提取專案待辦事項...'; 
-                p=`請列出以下內容的待辦事項與行動項目。必須使用 Markdown 排版 (Checklist style)，並使用 **粗體字** 標註負責人、時間點或重要任務。\n\n內容：\n${txt}`; 
-            } 
-            else { 
-                lt.textContent='AI 正在進行文法潤飾排版...'; 
-                p=`請專業潤飾以下文字。必須使用 Markdown 格式排版，分段清楚，並將句子的核心重點用 **粗體字** 標示。\n\n內容：\n${txt}`; 
-            }
-            
-            try {
-                const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODELS.TEXT_AND_TRANSLATE}:generateContent?key=${currentApiKey}`, { 
-                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [{ role: "user", parts: [{ text: p }] }] }) 
-                });
-                const j = await r.json(); 
-                if(!r.ok) throw new Error(j.error?.message);
-                const mdText = j?.candidates?.[0]?.content?.parts?.[0]?.text || '生成失敗。'; 
-                o.innerHTML = marked.parse(mdText);
-                window.showToast('AI 分析排版完成', 'success');
-            } catch(e) { 
-                o.innerHTML = `<p class="text-red-400 font-bold">生成錯誤: ${e.message}</p>`; 
-                window.showToast('生成失敗', 'error');
-            } finally { l.classList.replace('flex', 'hidden'); }
-        }
-
         async function processTextTranslation() {
             if (!currentApiKey) return window.showToast('需設定 API Key', 'error');
             const txt = document.getElementById('text-input').value.trim(); 
@@ -1560,12 +1449,12 @@
             document.getElementById('translation-loading').classList.add('flex');
             
             try {
-                const prompt = `Translate the following text to ${tLang}. Tone & Style: "${tone}". Output ONLY the translated text. You MUST format the output using Markdown (use clear paragraphs, and use **bold** for key phrases or important concepts).\n\nText:\n${txt}`;
+                const prompt = `請扮演專業翻譯人員。將以下文字翻譯成 ${tLang}。 Tone & Style: "${tone}". \n【輸出規範】\n1. 絕對不可包含 '\`\`\`markdown' 標記。\n2. 使用清晰的 Markdown 段落排版，並將關鍵概念使用 **粗體** 標示。\n\nText:\n${txt}`;
                 const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODELS.TEXT_AND_TRANSLATE}:generateContent?key=${currentApiKey}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [{ role: "user", parts: [{ text: prompt }] }] }) });
                 const data = await res.json(); 
                 if (!res.ok) throw new Error(data.error?.message);
                 const outTxt = data?.candidates?.[0]?.content?.parts?.[0]?.text || "翻譯失敗";
-                document.getElementById('text-output').innerHTML = marked.parse(outTxt.trim());
+                document.getElementById('text-output').innerHTML = marked.parse(outTxt.replace(/```markdown\n?/gi, '').replace(/```\n?/g, '').trim());
                 window.showToast('AI 翻譯排版完成', 'success');
             } catch (e) { 
                 window.showToast(`翻譯失敗: ${e.message}`, 'error'); 
@@ -1576,8 +1465,134 @@
         }
 
         // ==========================================
-        // Gemini TTS 官方發音引擎 (自動解碼 Float32)
+        // AI 智慧助手：Few-Shot JSON 強制結構輸出
         // ==========================================
+        async function runAIAssistant(type) {
+            if(!currentApiKey) return window.showToast('請先設定 API 金鑰', 'error');
+            const txt = document.getElementById('stt-source-text').innerText.trim(); 
+            if(!txt || txt.includes('【錯誤】')) return window.showToast('無有效的逐字稿內容', 'warning');
+            
+            const l = document.getElementById('ai-assistant-loading'); 
+            const o = document.getElementById('ai-assistant-output'); 
+            const lt = document.getElementById('ai-assistant-loading-text');
+            
+            l.classList.remove('hidden'); l.classList.add('flex'); o.innerHTML = ''; 
+            
+            let sysPrompt = "";
+            let userPrompt = `內容：\n${txt}`;
+
+            if(type === 'summary') { 
+                lt.textContent='AI 正在運用 JSON 結構生成企業級摘要...'; 
+                sysPrompt = `你是一位企業級高階幕僚。請針對提供的內容提取出最重要的核心要點，並以 JSON 格式回傳。
+【強制規範】
+1. 僅回傳純 JSON 字串，絕不可包含任何 Markdown (如 \`\`\`json) 標記。
+2. JSON 結構必須 100% 符合以下範例：
+{
+  "title": "會議重點摘要",
+  "points": [
+    { "keyword": "第一項關鍵字", "detail": "此關鍵字的詳細說明與背景" },
+    { "keyword": "第二項關鍵字", "detail": "詳細說明與決議" }
+  ]
+}`; 
+            } 
+            else if(type === 'action') { 
+                lt.textContent='AI 正在透過 JSON 解析提取待辦事項...'; 
+                sysPrompt = `你是一位專業的專案經理。請從內容中提取所有待辦事項與行動項目，並以 JSON 格式回傳。
+【強制規範】
+1. 僅回傳純 JSON 字串，絕不可包含任何 Markdown (如 \`\`\`json) 標記。
+2. JSON 結構必須 100% 符合以下範例：
+{
+  "title": "待辦事項清單",
+  "tasks": [
+    { "assignee": "負責人或單位(若無則填未指定)", "task": "任務具體內容與目標", "deadline": "時間或期限(若無填無)" }
+  ]
+}`; 
+            } 
+            else { 
+                lt.textContent='AI 正在進行文法潤飾與結構重組...'; 
+                sysPrompt = `你是一位專業的文案編輯。請針對內容進行專業文法潤飾與排版優化，消除口語贅字，並以 JSON 格式回傳。
+【強制規範】
+1. 僅回傳純 JSON 字串，絕不可包含任何 Markdown (如 \`\`\`json) 標記。
+2. JSON 結構必須 100% 符合以下範例，每一段落放入陣列：
+{
+  "title": "專業文法潤飾結果",
+  "paragraphs": [
+    "潤飾後的第一個段落內容，將核心重點保留。",
+    "潤飾後的第二個段落內容..."
+  ]
+}`; 
+            }
+            
+            try {
+                const payload = {
+                    systemInstruction: { parts: [{ text: sysPrompt }] },
+                    contents: [{ role: "user", parts: [{ text: userPrompt }] }],
+                    generationConfig: {
+                        temperature: 0.2,
+                        responseMimeType: "application/json" // 錨定 Gemini 官方 JSON 模式
+                    }
+                };
+
+                const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODELS.TEXT_AND_TRANSLATE}:generateContent?key=${currentApiKey}`, { 
+                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) 
+                });
+                const j = await r.json(); 
+                if(!r.ok) throw new Error(j.error?.message);
+                
+                const rawText = j?.candidates?.[0]?.content?.parts?.[0]?.text;
+                
+                // 啟動企業級自癒解析模組
+                const data = extractAndParseJSON(rawText);
+                
+                if (data) {
+                    // JSON 成功解析，動態生成排版 HTML
+                    let html = `<h3 class="text-brand-300 font-bold text-xl mb-4 border-b border-slate-600 pb-2"><i class="fas fa-sparkles"></i> ${data.title || 'AI 分析結果'}</h3>`;
+                    
+                    if (type === 'summary' && data.points) {
+                        html += `<ul class="space-y-4">`;
+                        data.points.forEach(p => {
+                            html += `<li class="flex flex-col sm:flex-row sm:items-start gap-2">
+                                <span class="bg-brand-900/40 text-brand-300 font-bold px-2.5 py-1 rounded border border-brand-700/50 shrink-0 mt-0.5">${p.keyword}</span>
+                                <span class="text-slate-200 leading-relaxed">${p.detail}</span>
+                            </li>`;
+                        });
+                        html += `</ul>`;
+                    } else if (type === 'action' && data.tasks) {
+                        html += `<div class="space-y-3">`;
+                        data.tasks.forEach(t => {
+                            html += `<div class="bg-slate-700/40 p-4 rounded-xl border border-slate-600 hover:border-emerald-500/50 transition-colors">
+                                <div class="flex items-start gap-3">
+                                    <i class="far fa-check-square text-emerald-400 mt-1 text-lg shrink-0"></i> 
+                                    <div class="flex flex-col gap-1.5">
+                                        <strong class="text-emerald-300 text-base">${t.task}</strong>
+                                        <div class="flex flex-wrap gap-3 text-xs text-slate-400 font-medium">
+                                            <span class="bg-slate-800/80 px-2 py-1 rounded"><i class="fas fa-user text-slate-500 mr-1"></i> ${t.assignee}</span>
+                                            <span class="bg-slate-800/80 px-2 py-1 rounded"><i class="far fa-clock text-slate-500 mr-1"></i> ${t.deadline}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>`;
+                        });
+                        html += `</div>`;
+                    } else if (type === 'grammar' && data.paragraphs) {
+                        data.paragraphs.forEach(p => {
+                            html += `<p class="text-slate-200 leading-relaxed mb-4 indent-4">${p}</p>`;
+                        });
+                    }
+                    o.innerHTML = html;
+                } else {
+                    // 若 JSON 徹底損毀，啟動 Fallback 降級處理 (預防白屏)
+                    console.warn("觸發 Fallback 降級：使用原始 Markdown 渲染");
+                    o.innerHTML = marked.parse(rawText || "生成失敗。");
+                }
+                
+                window.showToast('AI 分析與精美排版完成', 'success');
+            } catch(e) { 
+                o.innerHTML = `<div class="bg-red-900/20 border border-red-500/30 p-4 rounded-xl"><p class="text-red-400 font-bold m-0"><i class="fas fa-exclamation-triangle"></i> 生成錯誤</p><p class="text-sm text-red-300 mt-1">${e.message}</p></div>`; 
+                window.showToast('生成失敗', 'error');
+            } finally { l.classList.replace('flex', 'hidden'); }
+        }
+
         function base64ToArrayBuffer(base64) {
             const bin = window.atob(base64); const bytes = new Uint8Array(bin.length);
             for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i); return bytes.buffer;
@@ -1626,7 +1641,6 @@
                     const rateMatch = mimeType.match(/rate=(\d+)/);
                     const sampleRate = rateMatch ? parseInt(rateMatch[1], 10) : 24000;
 
-                    // 手動轉換 PCM 矩陣至瀏覽器 Float32 緩衝區
                     const pcmData = base64ToArrayBuffer(audioBase64);
                     const pcm16 = new Int16Array(pcmData); 
                     
