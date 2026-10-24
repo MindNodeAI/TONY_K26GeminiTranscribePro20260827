@@ -886,6 +886,7 @@
             document.getElementById('stt-output-section').classList.remove('hidden');
         }
 
+        // 本機端備份 (含 Base64 音檔封裝與獨立音檔下載)
         async function saveProjectData() {
             try {
                 let currentAudioData = null;
@@ -895,13 +896,33 @@
                         reader.onloadend = () => resolve({ dataUrl: reader.result, type: audioBlob.type, name: audioBlob.name || 'recorded_audio' });
                         reader.readAsDataURL(audioBlob);
                     });
+
+                    // --- 新增：獨立下載實體音檔 ---
+                    let ext = "webm"; // 預設錄音格式
+                    if (audioBlob.type.includes("wav")) ext = "wav";
+                    else if (audioBlob.type.includes("mp4")) ext = "mp4";
+                    else if (audioBlob.type.includes("mpeg") || audioBlob.type.includes("mp3")) ext = "mp3";
+                    
+                    if (audioBlob.name && audioBlob.name.includes('.')) {
+                        ext = audioBlob.name.split('.').pop();
+                    }
+
+                    const audioUrl = URL.createObjectURL(audioBlob);
+                    const audioLink = document.createElement('a');
+                    audioLink.href = audioUrl;
+                    audioLink.download = `TONY_STUDIO_Audio_${new Date().toISOString().slice(0,10)}.${ext}`;
+                    document.body.appendChild(audioLink);
+                    audioLink.click();
+                    document.body.removeChild(audioLink);
+                    URL.revokeObjectURL(audioUrl);
+                    // -----------------------------
                 }
                 const projectData = { version: "3.5", timestamp: new Date().toISOString(), ...getProjectSnapshot(), audioConfig: currentAudioData };
                 const blob = new Blob([JSON.stringify(projectData, null, 2)], { type: 'application/json' });
                 const a = document.createElement('a');
                 a.href = URL.createObjectURL(blob); a.download = `TONY_STUDIO_Project_${new Date().toISOString().slice(0,10)}.json`;
                 a.click(); URL.revokeObjectURL(a.href);
-                window.showToast('專案已完美備份至本機 (含音檔)', 'success');
+                window.showToast('專案與實體音檔已完美備份至本機', 'success');
             } catch (e) { window.showToast('本機存檔失敗', 'error'); }
         }
 
