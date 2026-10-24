@@ -1188,52 +1188,49 @@
             const l = document.createElement('a'); l.href = URL.createObjectURL(b); l.download = `Subtitle_${Date.now()}.srt`; l.click();
         }
 
-        async function compressAudio(file, targetSampleRate = 16000) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = async (e) => {
-                    try {
-                        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                        const audioBuffer = await audioContext.decodeAudioData(e.target.result);
-                        const offlineContext = new OfflineAudioContext(1, audioBuffer.duration * targetSampleRate, targetSampleRate);
-                        const source = offlineContext.createBufferSource();
-                        source.buffer = audioBuffer;
-                        source.connect(offlineContext.destination);
-                        source.start(0);
-                        const renderedBuffer = await offlineContext.startRendering();
-                        const wavBlob = audioBufferToWav(renderedBuffer);
-                        const newFileName = "compressed_" + file.name.replace(/\.[^/.]+$/, ".wav");
-                        resolve(new File([wavBlob], newFileName, { type: "audio/wav" }));
-                    } catch (err) { reject(err); }
-                };
-                reader.onerror = reject;
-                reader.readAsArrayBuffer(file);
-            });
-        }
-
-        function audioBufferToWav(buffer) {
-            const numOfChan = buffer.numberOfChannels, length = buffer.length * numOfChan * 2 + 44;
-            const out = new DataView(new ArrayBuffer(length));
-            let pos = 0;
-            const writeString = (str) => { for (let i = 0; i < str.length; i++) out.setUint8(pos + i, str.charCodeAt(i)); pos += str.length; };
-            const writeUint16 = (data) => { out.setUint16(pos, data, true); pos += 2; };
-            const writeUint32 = (data) => { out.setUint32(pos, data, true); pos += 4; };
-            writeString('RIFF'); writeUint32(length - 8); writeString('WAVE');
-            writeString('fmt '); writeUint32(16); writeUint16(1); writeUint16(numOfChan);
-            writeUint32(buffer.sampleRate); writeUint32(buffer.sampleRate * 2 * numOfChan);
-            writeUint16(numOfChan * 2); writeUint16(16); writeString('data'); writeUint32(length - pos - 4);
-            const channels = [];
-            for (let i = 0; i < numOfChan; i++) channels.push(buffer.getChannelData(i));
-            let offset = 0;
-            while (pos < length) {
-                for (let i = 0; i < numOfChan; i++) {
-                    let sample = Math.max(-1, Math.min(1, channels[i][offset]));
-                    sample = (0.5 + sample < 0 ? sample * 32768 : sample * 32767) | 0;
-                    out.setInt16(pos, sample, true); pos += 2;
+        // ==========================================
+        // 音訊上傳與錄音邏輯
+        // ==========================================
+        function downloadAudioFile() {
+            if (!audioBlob) {
+                // 備用方案：如果 audioBlob 因為跨域限制抓不到，但播放器上有雲端網址，就直接用該網址下載
+                const audioSrc = document.getElementById('audio-playback').src;
+                if (audioSrc && audioSrc.startsWith('http')) {
+                    const link = document.createElement('a');
+                    link.href = audioSrc;
+                    link.download = `TONY_STUDIO_Audio_Cloud_${new Date().toISOString().slice(0,10)}.webm`;
+                    link.target = "_blank"; // 跨域網址強制另開視窗下載
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    window.showToast('已從雲端連結強制開啟下載', 'success');
+                    return;
                 }
-                offset++;
+                return window.showToast('目前沒有可下載的本機音檔', 'warning');
             }
-            return new Blob([out], { type: "audio/wav" });
+            
+            try {
+                let ext = "webm"; // 預設錄音格式
+                if (audioBlob.type.includes("wav")) ext = "wav";
+                else if (audioBlob.type.includes("mp4")) ext = "mp4";
+                else if (audioBlob.type.includes("mpeg") || audioBlob.type.includes("mp3")) ext = "mp3";
+                
+                if (audioBlob.name && audioBlob.name.includes('.')) {
+                    ext = audioBlob.name.split('.').pop();
+                }
+
+                const audioUrl = URL.createObjectURL(audioBlob);
+                const audioLink = document.createElement('a');
+                audioLink.href = audioUrl;
+                audioLink.download = `TONY_STUDIO_Audio_${new Date().toISOString().slice(0,10)}.${ext}`;
+                document.body.appendChild(audioLink);
+                audioLink.click();
+                document.body.removeChild(audioLink);
+                URL.revokeObjectURL(audioUrl);
+                window.showToast('實體音檔下載成功', 'success');
+            } catch(e) {
+                window.showToast('音檔下載失敗', 'error');
+            }
         }
 
         async function handleFileUpload(e) { if (e.target.files.length > 0) processSelectedFile(e.target.files[0]); }
