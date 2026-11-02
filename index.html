@@ -956,7 +956,7 @@
                         
                         const fi = document.getElementById('selected-file-info');
                         fi.innerHTML = `<i class="fas fa-file-audio mr-1"></i> 已還原本機音檔: ${audioBlob.name}`;
-                        fi.classList.remove('hidden');
+                        fi.className = "mt-4 text-sm font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 inline-block px-4 py-1.5 rounded-lg shadow-sm animate-fade-in";
                     }
                     window.showToast('✅ 本機專案載入成功！', 'success');
                 } catch (err) { window.showToast('專案檔格式錯誤', 'error'); }
@@ -1072,23 +1072,26 @@
                     if (data.audioUrl) {
                         try {
                             const response = await fetch(data.audioUrl);
-                            if (response.ok) {
-                                audioBlob = await response.blob();
-                                audioBlob.isCloudUrl = true; 
-                                await prepareAudioForGemini();
-                                document.getElementById('audio-playback').src = URL.createObjectURL(audioBlob);
-                                document.getElementById('audio-playback-container').classList.remove('hidden');
-                                document.getElementById('btn-process-audio').disabled = false;
-                                
-                                const fi = document.getElementById('selected-file-info');
-                                fi.innerHTML = `<i class="fas fa-cloud-download-alt mr-1"></i> 已還原雲端音檔`;
-                                fi.classList.remove('hidden');
-                            }
+                            if (!response.ok) throw new Error("CORS Error");
+                            audioBlob = await response.blob();
+                            audioBlob.isCloudUrl = true; 
+                            await prepareAudioForGemini();
+                            document.getElementById('audio-playback').src = URL.createObjectURL(audioBlob);
+                            document.getElementById('audio-playback-container').classList.remove('hidden');
+                            document.getElementById('btn-process-audio').disabled = false;
+                            
+                            const fi = document.getElementById('selected-file-info');
+                            fi.innerHTML = `<i class="fas fa-cloud-download-alt mr-1"></i> 已還原雲端音檔`;
+                            fi.className = "mt-4 text-sm font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 inline-block px-4 py-1.5 rounded-lg shadow-sm animate-fade-in";
                         } catch (err) {
-                            window.showToast('已載入文字進度。音檔跨域限制僅供播放，無法再次AI處理', 'warning');
+                            window.showToast('音檔受雲端安全限制，請見畫面上方指示', 'warning');
                             document.getElementById('audio-playback').src = data.audioUrl;
                             document.getElementById('audio-playback-container').classList.remove('hidden');
                             document.getElementById('btn-process-audio').disabled = true;
+                            
+                            const fi = document.getElementById('selected-file-info');
+                            fi.innerHTML = `<i class="fas fa-exclamation-triangle mr-1"></i> 雲端音檔受保護。請點擊上方「下載音檔」後，重新拖曳至此框即可解鎖 AI 處理！`;
+                            fi.className = "mt-4 text-sm font-bold text-amber-700 bg-amber-50 border border-amber-300 inline-block px-4 py-1.5 rounded-lg shadow-sm animate-fade-in";
                         }
                     } else {
                          audioBlob = null; audioBase64 = null;
@@ -1258,7 +1261,7 @@
 
                 const fi = document.getElementById('selected-file-info');
                 fi.innerHTML = `<i class="fas fa-check-circle mr-1"></i> 已載入: ${audioBlob.name} (${(audioBlob.size/1024/1024).toFixed(2)} MB)`;
-                fi.classList.remove('hidden');
+                fi.className = "mt-4 text-sm font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 inline-block px-4 py-1.5 rounded-lg shadow-sm animate-fade-in";
 
                 const icon = document.getElementById('upload-icon');
                 if(icon) { icon.className = "fas fa-check-circle text-emerald-500"; }
