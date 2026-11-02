@@ -158,12 +158,12 @@
                 </div>
                 
                 <div id="upload-zone" class="border-2 border-dashed border-slate-300 rounded-xl p-8 text-center transition-all duration-300 cursor-pointer relative group overflow-hidden bg-slate-50/50 hover:bg-brand-50 hover:border-brand-400">
-                    <input type="file" id="file-upload" class="hidden" accept="audio/*,video/*">
+                    <input type="file" id="file-upload" class="hidden" accept=".webm,audio/*,video/*">
                     <div id="upload-icon-container" class="w-16 h-16 mx-auto bg-white shadow-sm group-hover:shadow text-slate-400 group-hover:text-brand-600 rounded-full flex items-center justify-center text-2xl mb-3 transition-all duration-300 group-hover:scale-110">
                         <i class="fas fa-file-audio" id="upload-icon"></i>
                     </div>
                     <p id="upload-text-main" class="text-slate-700 font-bold mb-1 transition-colors">點擊上傳，或將音檔拖曳至此</p>
-                    <p id="upload-text-sub" class="text-xs text-slate-500 bg-amber-50 inline-block px-2 py-1 rounded border border-amber-200"><i class="fas fa-info-circle text-amber-500"></i> 單檔最大支援 20MB。若會議較長，建議分段每 30 分鐘上傳一次，避免 AI 截斷。</p>
+                    <p id="upload-text-sub" class="text-xs text-slate-500 bg-amber-50 inline-block px-2 py-1 rounded border border-amber-200"><i class="fas fa-info-circle text-amber-500"></i> 單檔最大支援 30MB。若會議較長，建議分段每 30 分鐘上傳一次，避免 AI 截斷。</p>
                     <p id="selected-file-info" class="hidden mt-4 text-sm font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 inline-block px-4 py-1.5 rounded-lg shadow-sm animate-fade-in"></p>
                 </div>
 
@@ -412,7 +412,7 @@
                     <h3 class="text-red-600 border-t pt-5 mt-5"><i class="fas fa-exclamation-triangle"></i> 7. 系統限制與防呆機制說明 (必看)</h3>
                     <div class="bg-red-50 p-5 rounded-xl border border-red-200 text-sm shadow-inner">
                         <ul class="mb-0 space-y-3 text-slate-700">
-                            <li><strong class="text-red-700">上傳大小嚴格阻擋 (最大 20MB)：</strong>受限於 Google API 傳輸限制，單次上傳的音檔<strong>不可超過 20MB</strong>。若上傳超過此大小，系統會主動亮紅燈阻擋，請您先於本機端將檔案裁切後再上傳。</li>
+                            <li><strong class="text-red-700">上傳大小嚴格阻擋 (最大 30MB)：</strong>受限於 Google API 傳輸限制，單次上傳的音檔<strong>不可超過 30MB</strong>。若上傳超過此大小，系統會主動亮紅燈阻擋，請您先於本機端將檔案裁切後再上傳。</li>
                             <li><strong class="text-red-700">錄音 30 分鐘自動安全存檔：</strong>雖然 AI 能聽完極長的錄音，但每次「生成文字」的上限約為 6,000 之中文字。為了防止長度超載導致逐字稿結尾被強制截斷，本系統內建<strong>「30分鐘自動保護機制」</strong>。只要錄音滿 30 分鐘，系統會自動切斷並保存音檔，並跳出黃色提醒視窗。</li>
                             <li><strong class="text-brand-700"><i class="fas fa-lightbulb text-amber-500 mr-1"></i> TONY 顧問最佳實踐：</strong>遇到長篇會議時，請放心讓系統錄音。當跳出「30 分鐘已保護」的提示視窗時，請先點擊「開始 AI 語音處理」並存檔，將這半小時的紀錄確保無誤後，再按一次錄音鍵繼續下一段。這能 100% 確保您的會議內容不遺失，且 AI 分析精準度最高！</li>
                         </ul>
@@ -681,6 +681,57 @@
         function updateApiKeyUI() {
             const ind = document.getElementById('api-status-indicator');
             if(ind) ind.className = currentApiKey ? "w-3 h-3 rounded-full bg-emerald-500 absolute -top-1 -right-1 border-2 border-white shadow-[0_0_8px_rgba(16,185,129,0.6)]" : "w-3 h-3 rounded-full bg-red-500 absolute -top-1 -right-1 border-2 border-white shadow-[0_0_8px_rgba(239,68,68,0.6)]";
+        }
+
+        // ==========================================
+        // 核心壓縮引擎 (降頻至 16kHz WAV)
+        // ==========================================
+        async function compressAudio(file, targetSampleRate = 16000) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = async (e) => {
+                    try {
+                        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                        const audioBuffer = await audioContext.decodeAudioData(e.target.result);
+                        const offlineContext = new OfflineAudioContext(1, audioBuffer.duration * targetSampleRate, targetSampleRate);
+                        const source = offlineContext.createBufferSource();
+                        source.buffer = audioBuffer;
+                        source.connect(offlineContext.destination);
+                        source.start(0);
+                        const renderedBuffer = await offlineContext.startRendering();
+                        const wavBlob = audioBufferToWav(renderedBuffer);
+                        const newFileName = "compressed_" + file.name.replace(/\.[^/.]+$/, ".wav");
+                        resolve(new File([wavBlob], newFileName, { type: "audio/wav" }));
+                    } catch (err) { reject(err); }
+                };
+                reader.onerror = reject;
+                reader.readAsArrayBuffer(file);
+            });
+        }
+
+        function audioBufferToWav(buffer) {
+            const numOfChan = buffer.numberOfChannels, length = buffer.length * numOfChan * 2 + 44;
+            const out = new DataView(new ArrayBuffer(length));
+            let pos = 0;
+            const writeString = (str) => { for (let i = 0; i < str.length; i++) out.setUint8(pos + i, str.charCodeAt(i)); pos += str.length; };
+            const writeUint16 = (data) => { out.setUint16(pos, data, true); pos += 2; };
+            const writeUint32 = (data) => { out.setUint32(pos, data, true); pos += 4; };
+            writeString('RIFF'); writeUint32(length - 8); writeString('WAVE');
+            writeString('fmt '); writeUint32(16); writeUint16(1); writeUint16(numOfChan);
+            writeUint32(buffer.sampleRate); writeUint32(buffer.sampleRate * 2 * numOfChan);
+            writeUint16(numOfChan * 2); writeUint16(16); writeString('data'); writeUint32(length - pos - 4);
+            const channels = [];
+            for (let i = 0; i < numOfChan; i++) channels.push(buffer.getChannelData(i));
+            let offset = 0;
+            while (pos < length) {
+                for (let i = 0; i < numOfChan; i++) {
+                    let sample = Math.max(-1, Math.min(1, channels[i][offset]));
+                    sample = (0.5 + sample < 0 ? sample * 32768 : sample * 32767) | 0;
+                    out.setInt16(pos, sample, true); pos += 2;
+                }
+                offset++;
+            }
+            return new Blob([out], { type: "audio/wav" });
         }
 
         // ==========================================
@@ -1194,6 +1245,55 @@
         // ==========================================
         // 音訊上傳與錄音邏輯
         // ==========================================
+        
+        async function compressAudio(file, targetSampleRate = 16000) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = async (e) => {
+                    try {
+                        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                        const audioBuffer = await audioContext.decodeAudioData(e.target.result);
+                        const offlineContext = new OfflineAudioContext(1, audioBuffer.duration * targetSampleRate, targetSampleRate);
+                        const source = offlineContext.createBufferSource();
+                        source.buffer = audioBuffer;
+                        source.connect(offlineContext.destination);
+                        source.start(0);
+                        const renderedBuffer = await offlineContext.startRendering();
+                        const wavBlob = audioBufferToWav(renderedBuffer);
+                        const newFileName = "compressed_" + file.name.replace(/\.[^/.]+$/, ".wav");
+                        resolve(new File([wavBlob], newFileName, { type: "audio/wav" }));
+                    } catch (err) { reject(err); }
+                };
+                reader.onerror = reject;
+                reader.readAsArrayBuffer(file);
+            });
+        }
+
+        function audioBufferToWav(buffer) {
+            const numOfChan = buffer.numberOfChannels, length = buffer.length * numOfChan * 2 + 44;
+            const out = new DataView(new ArrayBuffer(length));
+            let pos = 0;
+            const writeString = (str) => { for (let i = 0; i < str.length; i++) out.setUint8(pos + i, str.charCodeAt(i)); pos += str.length; };
+            const writeUint16 = (data) => { out.setUint16(pos, data, true); pos += 2; };
+            const writeUint32 = (data) => { out.setUint32(pos, data, true); pos += 4; };
+            writeString('RIFF'); writeUint32(length - 8); writeString('WAVE');
+            writeString('fmt '); writeUint32(16); writeUint16(1); writeUint16(numOfChan);
+            writeUint32(buffer.sampleRate); writeUint32(buffer.sampleRate * 2 * numOfChan);
+            writeUint16(numOfChan * 2); writeUint16(16); writeString('data'); writeUint32(length - pos - 4);
+            const channels = [];
+            for (let i = 0; i < numOfChan; i++) channels.push(buffer.getChannelData(i));
+            let offset = 0;
+            while (pos < length) {
+                for (let i = 0; i < numOfChan; i++) {
+                    let sample = Math.max(-1, Math.min(1, channels[i][offset]));
+                    sample = (0.5 + sample < 0 ? sample * 32768 : sample * 32767) | 0;
+                    out.setInt16(pos, sample, true); pos += 2;
+                }
+                offset++;
+            }
+            return new Blob([out], { type: "audio/wav" });
+        }
+
         function downloadAudioFile() {
             if (!audioBlob) {
                 // 備用方案：如果 audioBlob 因為跨域限制抓不到，但播放器上有雲端網址，就直接用該網址下載
@@ -1241,14 +1341,22 @@
         async function processSelectedFile(file) {
             try {
                 let processedFile = file;
-                if (file.size > 20 * 1024 * 1024) {
-                    if(window.showToast) window.showToast("檔案超過 20MB，啟動本機降頻壓縮...", "info");
+                // 容量天花板上調至 30MB
+                if (file.size > 30 * 1024 * 1024) {
+                    if(window.showToast) window.showToast("檔案超過 30MB，啟動本機降頻壓縮...", "info");
                     try {
                         processedFile = await compressAudio(file, 16000);
                         const newSize = (processedFile.size / 1024 / 1024).toFixed(2);
+                        
+                        // 防呆機制：如果降頻解碼後體積反而膨脹 (因MP3轉無損WAV)，則直接攔截
+                        if (processedFile.size > file.size) {
+                            if(window.showToast) window.showToast("原檔已是高壓縮格式(如 MP3)，轉檔後反而膨脹，請先手動裁切時長。", "error");
+                            return;
+                        }
+
                         if(window.showToast) window.showToast(`壓縮成功！縮減至 ${newSize} MB`, "success");
-                        if (processedFile.size > 20 * 1024 * 1024) {
-                            return window.showToast("壓縮後仍超過 20MB，請手動裁切。", "error");
+                        if (processedFile.size > 30 * 1024 * 1024) {
+                            return window.showToast("壓縮後仍超過 30MB，請手動裁切。", "error");
                         }
                     } catch (err) {
                         return window.showToast("壓縮失敗，請確認檔案格式。", "error");
